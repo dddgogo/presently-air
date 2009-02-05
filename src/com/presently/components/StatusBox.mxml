@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Present.ly AIR application
+ *
+ * Copyright (c) 2008. All rights reserved.
+ * Author: Akinwale Ariwodola
+ * Version: 1.0
+ *
+ */
+-->
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="{_calculatedHeight}"
+    paddingRight="0" creationPolicy="all" creationComplete="handleCreationComplete(event)"
+    useHandCursor="true" xmlns:presently="com.presently.components.*"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off">
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Image;
+            import mx.events.FlexEvent;
+            import mx.managers.CursorManager;
+            import com.presently.events.StatusTypeChangedEvent;
+            import mx.binding.utils.BindingUtils;
+            import com.presently.events.LookupEvent;
+            import flash.net.navigateToURL;
+            import com.presently.model.Status;
+
+            [Bindable]
+            private var _status:Status;
+
+            [Bindable]
+            private var _stylesheet:StyleSheet = new StyleSheet();
+
+            [Bindable]
+            private var _currentStyleName:String;
+
+            [Bindable]
+            private var _calculatedHeight:Number = 50;
+
+            public function set stylesheet(css:StyleSheet):void {
+                _stylesheet = css;
+            }
+
+            public function set status(value:Status):void {
+                _status = value;
+                _status.addEventListener(StatusTypeChangedEvent.STATUS_TYPE_CHANGED, handleStatusTypeChanged);
+
+                resetStyle();
+            }
+
+            public function get status():Status {
+                return _status;
+            }
+
+            public function resetStyle():void {
+                if (status.isReply) {
+                    _currentStyleName = 'reply';
+                } else if (status.isDirectMessage) {
+                    _currentStyleName = 'direct';
+                } else {
+                    _currentStyleName = 'default';
+                }
+
+                this.styleName = _currentStyleName;
+            }
+
+            public function handleStatusTypeChanged(event:StatusTypeChangedEvent):void {
+                var status:Status = Status(event.currentTarget);
+                resetStyle();
+            }
+
+            private function handleLinkClick(event:TextEvent):void {
+                if (event.text.substr(0, 7) == 'lookup;') {
+                    var username:String = event.text.substr(7);
+                    dispatchEvent(new LookupEvent(username));
+                } else {
+                    navigateToURL(new URLRequest(event.text));
+                }
+            }
+
+            public function toggleSelected():void {
+                switch (currentState) {
+                    case "selected":
+                        currentState = "normal";
+                        break;
+                    default:
+                        currentState = "selected";
+                        if (this.parent is ScreenView) {
+                            ScreenView(this.parent).setSelectedChild(this);
+                        }
+                        break;
+                }
+            }
+
+            public function setSelected():void {
+                _currentStyleName = String(this.styleName);
+                if (this.parent is ScreenView) {
+                    ScreenView(this.parent).setSelectedChild(this);
+                }
+            }
+
+            private function handleCreationComplete(event:FlexEvent):void {
+                //controls.setStyle("cornerRadius", getStyle("cornerRadius"));
+            }
+
+            private function handleUpdateComplete(event:FlexEvent):void {
+                adjustHeight();
+            }
+
+            private function adjustHeight():void {
+                if (_calculatedHeight < main.height && main.height <= 100) {
+                    // We don't want to go beyond a height of 100
+                    _calculatedHeight = (main.height + 8);
+                }
+            }
+
+            private function handleProfileImageEvent(event:Event):void {
+                if (event.type == ProfileImage.LOOKUP) {
+                    // Dispatch the event for lookup
+                    dispatchEvent(new LookupEvent(_status.screenName));
+                } else {
+                    // Otherwise, re-dispatch the event
+                    dispatchEvent(event);
+                }
+            }
+
+            private function handleReplyClick(event:Event):void {
+                dispatchEvent(new Event(ProfileImage.REPLY));
+            }
+
+            protected override function childrenCreated():void {
+                super.childrenCreated();
+
+                profileimage.addEventListener(ProfileImage.DIRECT_MESSAGE, handleProfileImageEvent);
+                profileimage.addEventListener(ProfileImage.LOOKUP, handleProfileImageEvent);
+                profileimage.addEventListener(ProfileImage.REPLY, handleProfileImageEvent);
+            }
+        ]]>
+    </mx:Script>
+    <!--mx:transitions>
+        <mx:Transition fromState="normal" toState="selected">
+            <mx:Parallel targets="{[controls]}">
+                <mx:WipeDown duration="500" />
+                <mx:Fade />
+            </mx:Parallel>
+        </mx:Transition>
+        <mx:Transition fromState="selected" toState="normal">
+            <mx:Parallel targets="{[controls]}">
+                <mx:WipeUp duration="500" />
+                <mx:Fade />
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions-->
+
+    <mx:states>
+        <mx:State name="normal">
+            <mx:SetProperty target="{this}" name="height" value="{_calculatedHeight}" />
+        </mx:State>
+        <mx:State name="selected">
+            <!--mx:AddChild creationPolicy="all" relativeTo="{main}" position="after">
+                <mx:HBox id="controls" backgroundColor="0x000000" width="100%" height="24"
+                    verticalAlign="middle" paddingTop="3" paddingLeft="3" paddingRight="3"
+                    borderSides="bottom" borderStyle="solid" backgroundAlpha="0.2">
+                    <mx:Label text="{_status.getCreatedAtString()}" color="0x999999" />
+                    <mx:Spacer width="100%" />
+                </mx:HBox>
+            </mx:AddChild
+            <mx:SetProperty target="{this}" name="height" value="{_calculatedHeight+controls.height}" /-->
+            <mx:SetStyle target="{this}" name="borderThickness" value="2" />
+            <mx:SetStyle target="{this}" name="borderColor" value="#54872a" />
+        </mx:State>
+    </mx:states>
+
+    <mx:HBox id="main" width="100%" height="100%" paddingLeft="6" paddingBottom="4"
+        backgroundAlpha="0.0" verticalAlign="top" clipContent="false" x="0" y="5">
+        <presently:ProfileImage id="profileimage" source="{_status.profileImageUrl}" following="{_status.isFollowing}" />
+        <mx:VBox width="100%" height="100%" paddingRight="10" paddingTop="2" verticalGap="0">
+            <presently:MultilineText id="st" htmlText="{_status.toHTMLString()}"
+                width="100%" height="100%" color="0xFFFFFF" verticalScrollPolicy="off"
+                styleSheet="{_stylesheet}" link="handleLinkClick(event)"
+                updateComplete="handleUpdateComplete(event)" />
+        </mx:VBox>
+    </mx:HBox>
+</mx:Canvas>

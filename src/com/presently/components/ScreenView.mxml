@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Present.ly AIR application
+ *
+ * Copyright (c) 2008. All rights reserved.
+ * Author: Akinwale Ariwodola
+ * Version: 1.0
+ *
+ */
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+    focusEnabled="true" keyDown="handleKeyPress(event)" paddingRight="5"
+    creationComplete="handleCreationComplete(event)" childAdd="handleChildAdd(event)">
+<mx:Script>
+    <![CDATA[
+        import mx.events.FlexEvent;
+        import mx.controls.Button;
+        import mx.containers.HBox;
+
+        [Embed(source="assets/icons/previous_up.png")]
+        private const previousButtonSkin:Class;
+
+        [Embed(source="assets/icons/next_up.png")]
+        private const nextButtonSkin:Class;
+
+        [Bindable]
+        private var _currentChildIndex:int = 0;
+
+        [Bindable]
+        private var _paginateControls:HBox;
+
+        [Bindable]
+        private var _paginate:Boolean = false;
+
+        [Bindable]
+        private var _oub:Button;
+
+        public static const PREVIOUS_PAGE:String = "previousPage";
+        public static const NEXT_PAGE:String = "nextPage";
+        public static const OLDER_UPDATES:String = "olderUpdates";
+
+        public function get paginate():Boolean {
+            return _paginate;
+        }
+
+        public function set paginate(value:Boolean):void {
+            _paginate = value;
+        }
+
+        private function handleKeyPress(event:KeyboardEvent):void {
+            if (event.keyCode == 38) { // Up cursor key pressed
+                selectPreviousChild();
+            } else if (event.keyCode == 40) { // Down cursor key pressed
+                selectNextChild();
+            }
+        }
+
+        private function selectNextChild():void {
+            // No wrapping fix applied
+            if (_currentChildIndex < (numChildren - 1)) {
+                _currentChildIndex += 1;
+            }
+
+            selectChild(_currentChildIndex);
+        }
+
+        private function selectPreviousChild():void {
+            // Do not wrap
+            if (_currentChildIndex > 0) {
+                _currentChildIndex -= 1;
+            }
+
+            selectChild(_currentChildIndex);
+        }
+
+        public function setSelectedChild(child:StatusBox):void {
+            _currentChildIndex = this.getChildIndex(child);
+            selectChild(_currentChildIndex);
+        }
+
+        private function selectChild(idx:int, next:Boolean = true):void {
+            var child:DisplayObject = getChildAt(idx);
+            var status:StatusBox = child as StatusBox;
+            for (var i:int = 0; i < numChildren; i++) {
+                var statusBox:StatusBox = getChildAt(i) as StatusBox;
+                if (statusBox != null && statusBox != status) {
+                    statusBox.currentState = "normal"
+                }
+            }
+
+            if (status != null) {
+                status.currentState = "selected";
+            }
+
+            scrollToChildPosition(child);
+        }
+
+        private function scrollToChildPosition(child:DisplayObject):void {
+            if (this.getChildIndex(child) == 0) {
+                this.verticalScrollPosition = 0;
+                return;
+            }
+
+            if (this.getChildIndex(child) == (numChildren - 1)) {
+                this.verticalScrollPosition = this.maxVerticalScrollPosition;
+                return;
+            }
+
+            if (((child.y + child.height) - this.height) >= this.verticalScrollPosition) {
+                this.verticalScrollPosition = (child.y + child.height + 5) - this.height;
+                return;
+            }
+
+            if ((child.y - this.verticalScrollPosition) <= 0) {
+                this.verticalScrollPosition -= child.height;
+                return;
+            }
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+
+        }
+
+        private function handleCreationComplete(event:FlexEvent):void {
+            if (_paginate) {
+                _paginateControls = new HBox();
+                _paginateControls.percentWidth = 100;
+                _paginateControls.setStyle('horizontalGap', '1');
+                _paginateControls.setStyle('horizontalAlign', 'center');
+                _paginateControls.setStyle('paddingTop', '10');
+                _paginateControls.visible = false;
+
+                // Older updates button
+                _oub = new Button();
+                _oub.percentWidth = 100;
+                _oub.label = "Load Older Updates";
+                _oub.addEventListener(MouseEvent.CLICK, handleOubClick);
+                _paginateControls.addChild(_oub);
+
+                // Previous button
+                /*var pb:Button = new Button();
+                pb.toolTip = "Newer updates";
+                pb.setStyle("upSkin", previousButtonSkin);
+                pb.setStyle("overSkin", previousButtonSkin);
+                pb.setStyle("downSkin", previousButtonSkin);
+                pb.addEventListener(MouseEvent.CLICK, handlePreviousClick);
+
+                // Next button
+                var nb:Button = new Button();
+                nb.toolTip = "Older updates";
+                nb.setStyle("upSkin", nextButtonSkin);
+                nb.setStyle("overSkin", nextButtonSkin);
+                nb.setStyle("downSkin", nextButtonSkin);
+                nb.addEventListener(MouseEvent.CLICK, handleNextClick);
+
+                _paginateControls.addChild(pb);
+                _paginateControls.addChild(nb);*/
+                this.addChild(_paginateControls);
+            }
+        }
+
+        private function handlePreviousClick(event:MouseEvent):void {
+            dispatchEvent(new Event(PREVIOUS_PAGE));
+        }
+
+        private function handleNextClick(event:MouseEvent):void {
+            dispatchEvent(new Event(NEXT_PAGE));
+        }
+
+        private function handleOubClick(event:MouseEvent):void {
+            dispatchEvent(new Event(OLDER_UPDATES));
+        }
+
+        private function handleChildAdd(event:Event):void {
+            if (_paginateControls != null && numChildren > 1) {
+                _paginateControls.visible = true;
+            }
+        }
+    ]]>
+</mx:Script>
+</mx:VBox>

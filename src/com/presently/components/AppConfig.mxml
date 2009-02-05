@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Present.ly AIR application
+ *
+ * Copyright (c) 2008. All rights reserved.
+ * Author: Akinwale Ariwodola
+ * Version: 1.0
+ *
+ */
+-->
+<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="350" height="240"
+    creationComplete="bindSettings()" title="Present.ly Settings"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    initialize="init()" closing="onWindowClosing(event)">
+    <mx:Script>
+        <![CDATA[
+            import mx.events.CloseEvent;
+            private var settings:XML = <settings/>;
+            private var sfile:File = null;
+
+            private function init():void {
+                sfile = File.applicationStorageDirectory.resolvePath("settings.xml");
+
+                // Load the settings from the file
+                var fs:FileStream = new FileStream();
+                fs.open(sfile, FileMode.READ);
+                settings = new XML(fs.readUTF());
+                fs.close();
+            }
+
+            private function saveSettings():void {
+                addSetting("username", username.text);
+                addSetting("accountName", accountName.text);
+                addSetting("password", password.text);
+                addSetting("autoUpdateInterval", autoUpdateInterval.value.toString());
+
+                if (mainStreamNotify.selected) {
+                    addSetting("mainStreamNotify", "1");
+                } else {
+                    removeSetting("mainStreamNotify");
+                }
+
+                /*if (publicTimelineNotify.selected) {
+                    addSetting("publicTimelineNotify", "1");
+                } else {
+                    removeSetting("publicTimelineNotify");
+                }*/
+
+                if (directMessagesNotify.selected) {
+                    addSetting("directMessagesNotify", "1");
+                } else {
+                    removeSetting("directMessagesNotify");
+                }
+
+                if (enableTransparency.selected) {
+                    addSetting("enableTransparency", "1");
+                } else {
+                    removeSetting("enableTransparency");
+                }
+
+                if (minimizeToTray.selected) {
+                    addSetting("minimizeToTray", "1");
+                } else {
+                    removeSetting("minimizeToTray");
+                }
+
+                //trace(settings.toXMLString());
+                writeSettings();
+            }
+
+            private function onWindowClosing(event:Event):void {
+                saveSettings();
+            }
+
+            private function writeSettings():void {
+                var fs:FileStream = new FileStream();
+                fs.open(sfile, FileMode.WRITE);
+                fs.writeUTF("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"+settings.toXMLString());
+                fs.close();
+            }
+
+            private function addSetting(key:String, value:String):void {
+                var node:XML = new XML("<"+key+"/>");
+                node.appendChild(value);
+
+                // Check if the node exists
+                for each (var existNode:XML in settings.children()) {
+                    var name:Object = node.name();
+                    if (existNode.name() == key) {
+                        // The node exists, replace it
+                        settings.replace(name, node);
+                        return;
+                    }
+                }
+
+                // The node does not exist
+                settings.appendChild(node);
+            }
+
+            private function removeSetting(key:String):void {
+                var nodes:XMLList = XMLList(settings).children();
+                for (var i:int = 0; i < nodes.length(); i++) {
+                    if (nodes[i].name() == key) {
+                        delete nodes[i];
+                        return;
+                    }
+                }
+            }
+
+            private function handleConnectClick():void {
+                saveSettings();
+
+                this.close();
+            }
+
+            private function bindSettings():void {
+                username.text = settings.username;
+                password.text = settings.password;
+                accountName.text = settings.accountName;
+
+                var aui:Number = Number(settings.autoUpdateInterval);
+                autoUpdateInterval.value = (!isNaN(aui) && aui > 0) ? aui : 10;
+
+                mainStreamNotify.selected = (settings.mainStreamNotify == "1");
+                //publicTimelineNotify.selected = (settings.publicTimelineNotify == "1");
+                directMessagesNotify.selected = (settings.directMessagesNotify == "1");
+                enableTransparency.selected = (settings.enableTransparency == "1");
+                minimizeToTray.selected = (settings.minimizeToTray == "1");
+
+                //storePasswd.selected = (settings.storePasswd == "1");
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:TabNavigator id="tabnav" width="100%" height="100%" creationPolicy="all">
+        <mx:VBox label="Account" width="100%" paddingLeft="10" paddingRight="10"
+            paddingTop="5" verticalGap="10" horizontalCenter="50">
+            <mx:HBox verticalAlign="bottom" horizontalGap="0">
+                <mx:Label text="Username" width="100" />
+                <mx:TextInput id="username" width="100" />
+            </mx:HBox>
+
+            <mx:HBox verticalAlign="bottom" horizontalGap="0">
+                <mx:Label text="Password" width="100" />
+                <mx:TextInput id="password" width="100" displayAsPassword="true" />
+            </mx:HBox>
+
+            <mx:HBox verticalAlign="bottom" horizontalGap="0">
+                <mx:Label text="Account Name" width="100" />
+                <mx:TextInput id="accountName" width="100" />
+                <mx:Label text=".presentlyapp.com"/>
+            </mx:HBox>
+
+            <!--mx:CheckBox id="storePasswd" label="Store my password" /-->
+        </mx:VBox>
+
+        <mx:VBox id="options" label="Options" width="100%" paddingLeft="10" paddingRight="10"
+            paddingTop="10" verticalGap="5">
+
+            <mx:HBox verticalAlign="bottom">
+                <mx:Label text="Auto-update interval (minutes)" />
+                <mx:NumericStepper id="autoUpdateInterval" width="50" value="10" maximum="999" textAlign="right" />
+            </mx:HBox>
+
+            <mx:CheckBox id="enableTransparency" label="Enable transparency" selected="true" />
+
+            <mx:CheckBox id="minimizeToTray" label="Minimize to system tray" selected="true" paddingBottom="10" />
+
+            <mx:VBox id="notifications" verticalGap="1" paddingTop="10" paddingLeft="10" paddingBottom="5"
+                borderStyle="solid" borderColor="0xCCCCCC" cornerRadius="5" width="100%">
+            <mx:CheckBox id="mainStreamNotify" label="Main Stream Updates" selected="true" />
+            <!--mx:CheckBox id="publicTimelineNotify" label="Public Timeline Updates" /-->
+            <mx:CheckBox id="directMessagesNotify" label="Direct Messages" selected="true" />
+            </mx:VBox>
+        </mx:VBox>
+    </mx:TabNavigator>
+
+    <mx:TextArea text="Display notifications" fontWeight="bold" visible="{tabnav.selectedChild==options}"
+        x="{notifications.x+10}" y="{notifications.y+23}" editable="false" selectable="false"
+        backgroundColor="0xFFFFFF" borderStyle="none" height="20" width="140" fontSize="11" />
+
+    <mx:Button id="connectBtn" label="Save and Connect" click="handleConnectClick()"
+        x="{this.width/2-connectBtn.width/2}" y="{this.height-30}" />
+</mx:Window>

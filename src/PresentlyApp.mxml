@@ -1,0 +1,1109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Present.ly AIR application
+ *
+ * Copyright (c) 2008. All rights reserved.
+ * Author: Akinwale Ariwodola
+ * Version: 1.0
+ *
+ */
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Present.ly AIR"
+    xmlns:presently="com.presently.components.*" xmlns:chrome="com.presently.appearance.chrome.*"
+    showFlexChrome="false" showStatusBar="false" showGripper="false" creationPolicy="all"
+    initialize="init()" creationComplete="preload()" clipContent="true"
+    paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="5" verticalGap="0"
+    verticalScrollPolicy="off" minWidth="380" minHeight="600" mouseWheel="handleMouseWheel(event)"
+    fontAntiAliasType="advanced" fontSharpness="200" fontThickness="-200" fontGridFitType="subpixel"
+    close="handleClosing(event)" keyUp="handleKeyPress(event)"
+    applicationComplete="handleApplicationComplete(event)">
+    <mx:Style source="skins/default/app.css" />
+    <mx:Style>
+        VScrollBar {
+            downArrowSkin: Embed(source='assets/skin/scroll_down_arrow.png');
+            upArrowSkin: Embed(source='assets/skin/scroll_up_arrow.png');
+            trackSkin: Embed(source='assets/skin/scroll_track.png');
+            trackDisabledSkin: Embed(source='assets/skin/scroll_track.png');
+            thumbSkin: Embed(source='assets/skin/scroll_thumb.png',
+                scaleGridLeft='5', scaleGridRight='7', scaleGridTop='5', scaleGridBottom='7');
+        }
+    </mx:Style>
+    <mx:Script>
+        <![CDATA[
+            import com.presently.components.PersonBox;
+            import com.presently.components.ProfileImage;
+            import com.presently.events.NotificationClickedEvent;
+            import flash.utils.clearTimeout;
+            import mx.events.FlexEvent;
+            import com.presently.components.NotificationWindow;
+            import com.presently.components.Notifier;
+            import flash.utils.clearInterval;
+            import flash.utils.setInterval;
+            import com.presently.components.AppConfig;
+            import com.presently.components.StatusBox;
+            import mx.effects.Resize;
+            import com.presently.model.Person;
+            import com.presently.events.LookupEvent;
+            import mx.containers.HBox;
+            import com.presently.model.Status;
+            import com.presently.utils.RequestInterface;
+            import mx.utils.StringUtil;
+            import mx.controls.Alert;
+            import mx.events.AIREvent;
+
+            private var settings:XML = <settings/>;
+            private var _credentials:String = '';
+            private var _statuses:Array = new Array();
+            private var _replies:Array = new Array();
+            private var _currentLookupUser:String = null;
+            private var _numNewUpdates:int = 0;
+            private var _numNewReplies:int = 0;
+            private var _numNewDirect:int = 0;
+            private var _notifier:Notifier = new Notifier();
+            private var _latestStatusID:Number = 0;
+            private var _appConfigWindow:AppConfig = null;
+
+            private static const _months:Array = new Array(
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            );
+
+            [Embed("assets/icons/config_up.png")]
+            private const configButtonUpSkin:Class;
+
+            [Embed("assets/icons/config_alt.png")]
+            private const configButtonAltSkin:Class;
+
+            [Embed("assets/icons/refresh_up.png")]
+            private const refreshButtonUpSkin:Class;
+
+            [Embed("assets/icons/refresh_alt.png")]
+            private const refreshButtonAltSkin:Class;
+
+            [Embed("assets/icons/toggle_up.png")]
+            private const toggleButtonUpSkin:Class;
+
+            [Embed("assets/icons/toggle_alt.png")]
+            private const toggleButtonAltSkin:Class;
+
+            [Embed("assets/icons/toggle_selected_up.png")]
+            private const toggleButtonSelectedUpSkin:Class;
+
+            [Embed("assets/icons/toggle_selected_alt.png")]
+            private const toggleButtonSelectedAltSkin:Class;
+
+            // The request interfaces
+            private var _requestInterfaces:Array = new Array();
+            private var _requestIntervals:Array = new Array();
+            [Bindable]
+            private var _rInterval:Number = 0;
+
+            // The request interface names (keys) for the requestInterfaces array
+            private const PTIMELINE_RI:String = 'ptimeline';
+            private const FTIMELINE_RI:String = 'ftimeline';
+            private const UTIMELINE_RI:String = 'utimeline';
+            private const DMESSAGES_RI:String = 'dmessages';
+            private const FRIENDS_RI:String = 'friends';
+            private const FOLLOWERS_RI:String = 'followers';
+            private const LOOKUP_RI:String = 'lookup';
+            private const UPDATE_RI:String = 'update';
+
+            private const LATEST_STATUS:String = 'latestStatus';
+
+            [Bindable]
+            private var _transparencyEnabled:Boolean = false;
+
+            [Bindable]
+            private var _charactersLeft:int = 140;
+
+            [Bindable]
+            private var _statusCSS:StyleSheet = new StyleSheet();
+
+            private function init():void {
+                loadSettings();
+
+                // Set the tray icon
+                if (NativeApplication.supportsSystemTrayIcon) {
+                    var iconLoader:Loader = new Loader();
+                    iconLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, handleTrayIconLoaded);
+                    iconLoader.load(new URLRequest("assets/icons/app/icon_16.png"));
+
+                    var tiMenu:NativeMenu = new NativeMenu();
+                    var tiOpenMenuItem:NativeMenuItem = tiMenu.addItem(new NativeMenuItem("Open"));
+                    var tiExitMenuItem:NativeMenuItem = tiMenu.addItem(new NativeMenuItem("Exit"));
+
+                    tiOpenMenuItem.addEventListener(Event.SELECT, handleTrayIconMenuItemSelect);
+                    tiExitMenuItem.addEventListener(Event.SELECT, handleTrayIconMenuItemSelect);
+
+                    var sysTrayIcon:SystemTrayIcon = SystemTrayIcon(NativeApplication.nativeApplication.icon);
+                    sysTrayIcon.addEventListener(MouseEvent.CLICK, handleTrayIconClicked);
+                    sysTrayIcon.tooltip = "Present.ly";
+                    sysTrayIcon.menu = tiMenu;
+                }
+
+                // Load the style skins
+                //StyleManager.loadStyleDeclarations("skins/default/app.css", true, true);
+
+                // Load the stylesheet
+                var css:File = File.applicationDirectory.resolvePath('skins/default/textarea.css');
+                if (css.exists) {
+                    var fs:FileStream = new FileStream();
+                    fs.open(css, FileMode.READ);
+                    var cssData:String = fs.readMultiByte(fs.bytesAvailable, 'utf-8');
+                    fs.close();
+
+                    _statusCSS.parseCSS(cssData);
+                }
+
+                // Handle lookup events from the notifier
+                _notifier.addEventListener(LookupEvent.LOOKUP, handleLookupEvent);
+                // Handle notification clicked events from the notifier
+                _notifier.addEventListener(NotificationClickedEvent.NOTIFICATION_CLICKED,
+                    handleNotificationClicked)
+            }
+
+            private function handleTrayIconLoaded(event:Event):void {
+                NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
+            }
+
+            private function handleTrayIconClicked(event:MouseEvent):void {
+                nativeWindow.visible = true;
+                nativeWindow.restore();
+            }
+
+            private function handleTrayIconMenuItemSelect(event:Event):void {
+                var menuItem:NativeMenuItem = NativeMenuItem(event.currentTarget);
+                if (menuItem.label == "Open") {
+                    nativeWindow.restore();
+                } else if (menuItem.label == "Exit") {
+                    nativeApplication.exit();
+                }
+            }
+
+            private function loadSettings():void {
+                var sfile:File = File.applicationStorageDirectory.resolvePath("settings.xml");
+                var fs:FileStream = new FileStream();
+                if (!sfile.exists) {
+                    fs.open(sfile, FileMode.WRITE);
+                    fs.writeUTF("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"+settings.toXMLString());
+                    fs.close();
+                }
+                else {
+                    fs.open(sfile, FileMode.READ);
+                    settings = new XML(fs.readUTF());
+                }
+                fs.close();
+
+                var lsfile:File = File.applicationStorageDirectory.resolvePath(LATEST_STATUS);
+                if (!lsfile.exists) {
+                    writeLastStatusData();
+                } else {
+                    fs.open(lsfile, FileMode.READ);
+                    var data:String = fs.readMultiByte(fs.bytesAvailable, "utf-8");
+                    fs.close();
+
+                    _latestStatusID = Number(data);
+                    if(isNaN(_latestStatusID)) {
+                        _latestStatusID = 0;
+                    }
+                }
+
+                // Set the configured request auto-update interval
+                _rInterval = Number(settings.autoUpdateInterval)*60000;
+                // Opacity option
+                _transparencyEnabled = (settings.enableTransparency == "1");
+
+                // Reset all intervals
+                resetRequestIntervals();
+
+                // Check for minimze to tray
+                if (NativeApplication.supportsSystemTrayIcon) {
+                    // Add our minimize handler
+                    nativeWindow.addEventListener(
+                        NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGE, handleNativeWindowMinimized);
+                }
+
+                if (appControlBar != null) {
+                    if (StringUtil.trim(String(settings.accountName)).length > 0) {
+                        appControlBar.accountName = settings.accountName + ".presentlyapp.com";
+                    }
+                }
+            }
+
+            private function handleApplicationComplete(event:Event):void {
+                stage.quality = StageQuality.BEST;
+            }
+
+            private function handleNativeWindowMinimized(event:NativeWindowDisplayStateEvent):void {
+                if (event.afterDisplayState == NativeWindowDisplayState.MINIMIZED &&
+                    settings.minimizeToTray == "1") {
+                    // Only use our custom handler when minimizeToTray is enabled
+                    event.preventDefault();
+                    nativeWindow.visible = false;
+                }
+            }
+
+            private function preload():void {
+                if (StringUtil.trim(settings.username).length == 0 ||
+                    StringUtil.trim(settings.password).length == 0 ||
+                    StringUtil.trim(settings.accountName).length == 0) {
+                        if (_appConfigWindow == null) {
+                            _appConfigWindow = showAppConfigDialog();
+                        }
+                } else {
+                    _credentials = settings.username+";"+settings.password+";"+settings.accountName;
+                    createRequestInterfaces();
+                }
+            }
+
+            private function resetRequestIntervals():void {
+                for (var name:String in _requestIntervals) {
+                    clearInterval(_requestIntervals[name]);
+                    var ri:RequestInterface = getRequestInterface(name);
+                    sendRequest(name, ri.params, ri.method, _rInterval);
+                }
+            }
+
+            private function createRequestInterfaces():void {
+                addRequestInterface(FTIMELINE_RI, RequestInterface.FRIENDS_TIMELINE);
+                addRequestInterface(PTIMELINE_RI, RequestInterface.PUBLIC_TIMELINE);
+                addRequestInterface(UTIMELINE_RI, RequestInterface.USER_TIMELINE);
+                addRequestInterface(DMESSAGES_RI, RequestInterface.DIRECT_MESSAGES);
+                addRequestInterface(FRIENDS_RI, RequestInterface.FRIENDS);
+                addRequestInterface(FOLLOWERS_RI, RequestInterface.FOLLOWERS);
+                addRequestInterface(LOOKUP_RI, RequestInterface.LOOKUP);
+                addRequestInterface(UPDATE_RI, RequestInterface.UPDATE);
+
+                for each (var ri:RequestInterface in _requestInterfaces) {
+                    ri.addEventListener(Event.COMPLETE, handleRequest);
+                    ri.addEventListener(ErrorEvent.ERROR, handleRequestError);
+                    ri.addEventListener(RequestInterface.SENDING_NEW_REQUEST, handleSendingNewRequest);
+                }
+
+                // First request to send is the Main Stream request
+                sendRequest(FTIMELINE_RI, null, "GET", _rInterval);
+            }
+
+            private function sendRequest(name:String, params:String=null,
+                method:String="GET", interval:Number=0):void {
+                var ri:RequestInterface = RequestInterface(_requestInterfaces[name]);
+                ri.send(method, params);
+
+                if (interval > 0) {
+                    // Clear the interval in case it already exists
+                    clearInterval(_requestIntervals[name]);
+                    // then set the interval
+                    setRequestInterval(name, interval);
+                }
+            }
+
+            private function handleSendingNewRequest(event:Event):void {
+                var ri:RequestInterface = RequestInterface(event.currentTarget);
+                setStatus("Processing "+ri.type+" request...");
+            }
+
+            private function addRequestInterface(name:String, type:String):void {
+                if (_requestInterfaces[name] == null) {
+                    _requestInterfaces[name] = new RequestInterface(type, _credentials);
+                    _requestIntervals[name] = 0;
+                }
+            }
+
+            private function getRequestInterface(name:String):RequestInterface {
+                return RequestInterface(_requestInterfaces[name]);
+            }
+
+            private function getRequestInterfaceKey(ri:RequestInterface):String {
+                for (var key:String in _requestInterfaces) {
+                    if (_requestInterfaces[key] == ri) {
+                        return key;
+                    }
+                }
+
+                return null;
+            }
+
+            private function setRequestInterval(name:String, delay:Number):void {
+                // Only set requestIntervals for requestInerfaces that already
+                // have data retrieved
+
+                // We only need to set requestIntervals for public timeline,
+                // friends timeline and direct
+                if (name == FTIMELINE_RI || name == PTIMELINE_RI || name == DMESSAGES_RI) {
+                    var ri:RequestInterface = RequestInterface(_requestInterfaces[name]);
+                    if (_requestIntervals[name] < 1) {
+                        _requestIntervals[name] = setInterval(sendRequest, delay, name, ri.params, ri.method);
+                    }
+                }
+                //trace("name="+name+";requestInterface="+_requestInterfaces[name]);
+            }
+
+            private function clearRequestInterval(name:String):void {
+                clearInterval(_requestIntervals[name]);
+            }
+
+            private function handleRequest(event:Event):void {
+                var ri:RequestInterface = RequestInterface(event.currentTarget);
+                setStatus(ri.type+" request completed.");
+
+                try {
+                    switch (ri.type) {
+                        case RequestInterface.PUBLIC_TIMELINE: handlePtimelineRequest(event); break;
+                        case RequestInterface.FRIENDS_TIMELINE: handleFtimelineRequest(event); break;
+                        case RequestInterface.USER_TIMELINE: handleUtimelineRequest(event); break;
+                        case RequestInterface.DIRECT_MESSAGES: handleDirectMessagesRequest(event); break;
+                        case RequestInterface.FRIENDS: handleFriendsRequest(event); break;
+                        case RequestInterface.FOLLOWERS: handleFollowersRequest(event); break;
+                        case RequestInterface.LOOKUP: handleLookupRequest(event); break;
+                        case RequestInterface.UPDATE: handleUpdateRequest(event); break;
+                    }
+                } catch (error:TypeError) {
+                    setStatus('Malformed request data for '+ri.type, true);
+                    trace(error.message);
+                }
+            }
+
+            private function handleFriendsRequest(event:Event):void {
+                var friendsData:XML = new XML(RequestInterface(event.currentTarget).requestData);
+                parsePersonsData(XMLList(friendsData.user), friendsView);
+            }
+
+            private function handleFollowersRequest(event:Event):void {
+                var followersData:XML = new XML(RequestInterface(event.currentTarget).requestData);
+                parsePersonsData(XMLList(followersData.user), followersView);
+            }
+
+            private function parsePersonsData(personList:XMLList, target:VBox):void {
+                if (personList.length() > 0) {
+                    VBox(target).removeAllChildren();
+                }
+
+                for each (var personData:XML in personList) {
+                    var person:Person = getPersonFromXML(personData);
+                    var personBox:PersonBox = new PersonBox();
+                    personBox.person = person;
+                    personBox.stylesheet = _statusCSS;
+                    personBox.addEventListener(LookupEvent.LOOKUP, handleLookupEvent);
+                    personBox.addEventListener(ProfileImage.DIRECT_MESSAGE, handleDirectMessageClick);
+                    personBox.addEventListener(ProfileImage.REPLY, handleReplyClick);
+
+                    target.addChild(personBox);
+                }
+            }
+
+            private function handleLookupRequest(event:Event):void {
+                var personData:XML = new XML(getRequestInterface(LOOKUP_RI).requestData);
+                var personBox:PersonBox = new PersonBox();
+                personBox.person = getPersonFromXML(personData);
+                personBox.stylesheet = _statusCSS;
+                personBox.addEventListener(LookupEvent.LOOKUP, handleLookupEvent);
+                personBox.addEventListener(ProfileImage.DIRECT_MESSAGE, handleDirectMessageClick);
+                personBox.addEventListener(ProfileImage.REPLY, handleReplyClick);
+
+                lookupView.removeChildAt(0);
+                lookupView.addChildAt(personBox, 0);
+            }
+
+            private function getPersonFromXML(personData:XML):Person {
+                return new Person(personData.id, personData.screen_name,
+                    personData.name, personData.profile_image_url, personData.location,
+                    personData.time_zone, personData.description, personData.url,
+                    personData.followers_count, personData.friends_count, personData.statuses_count,
+                    (personData.following == "true"));
+            }
+
+            private function handleUpdateRequest(event:Event):void {
+                updateText.text = '';
+                updateText.enabled = true;
+
+                // Set the param to null, just in case (multiple updates fix)
+                getRequestInterface(UPDATE_RI).params = null;
+
+                if (screens.selectedChild == homeView || screens.selectedChild == ptView) {
+                    refreshView();
+                } else {
+                    // If friends/public timeline not current view, schedule
+                    // for a refresh (will reload once the user changes to that view)
+                    getRequestInterface(FTIMELINE_RI).requestData = null;
+                    getRequestInterface(PTIMELINE_RI).requestData = null;
+                }
+            }
+
+            private function handleRequestError(event:ErrorEvent):void {
+                var type:String = RequestInterface(event.currentTarget).type;
+
+                setStatus(type+' request error.', true);
+                /*Alert.show('An error occurred while trying to process the request. ' +
+                    'Internet connection issues, perhaps? You can try again by using ' +
+                    'the refresh button.', type + ' Request Error');*/
+
+                if (!updateText.enabled) {
+                    updateText.enabled = true;
+                }
+            }
+
+            private function handleFtimelineRequest(event:Event):void {
+                var ftimeline:XML = new XML(getRequestInterface(FTIMELINE_RI).requestData);
+                var statusList:XMLList = XMLList(ftimeline.status);
+
+                parseTimelineData(statusList, homeView, FTIMELINE_RI);
+
+                // Update the latest status ID (Growl-esque notifications fix?)
+                _latestStatusID = Math.max(getMaxStatusId(), _latestStatusID);
+
+                // Send the direct messages request immediately after this (only if its the first time)
+                /*if (getRequestInterface(DMESSAGES_RI).requestData == null) {
+                    sendRequest(DMESSAGES_RI, null, "GET", _rInterval);
+                }*/
+            }
+
+            private function handlePtimelineRequest(event:Event):void {
+                var ptimeline:XML = new XML(getRequestInterface(PTIMELINE_RI).requestData);
+                var statusList:XMLList = XMLList(ptimeline.status);
+
+                parseTimelineData(statusList, ptView, PTIMELINE_RI);
+
+                // Update the latest status ID (Growl-esque notifications fix?)
+                _latestStatusID = Math.max(getMaxStatusId(), _latestStatusID);
+            }
+
+            private function handleUtimelineRequest(event:Event):void {
+                //trace(getRequestInterface(UTIMELINE_RI).requestData);
+                var utimeline:XML = new XML(getRequestInterface(UTIMELINE_RI).requestData);
+                var statusList:XMLList = XMLList(utimeline.status);
+
+                while (lookupView.numChildren > 1) {
+                    // NOTE: Child 0 is the user info box
+                    lookupView.removeChildAt(1);
+                }
+                parseTimelineData(statusList, lookupView, UTIMELINE_RI, false);
+            }
+
+            private function handleDirectMessagesRequest(event:Event):void {
+                var dmessages:XML = new XML(getRequestInterface(DMESSAGES_RI).requestData);
+                var statusList:XMLList = XMLList(dmessages.status);
+
+                if (statusList.length() > 0) {
+                    while (dmView.numChildren > 1) {
+                        // NOTE: Child 0 is paginatorControl
+                        dmView.removeChildAt(1);
+                    }
+                    parseTimelineData(statusList, dmView, DMESSAGES_RI, false, true);
+                }
+            }
+
+            private function addStatus(s:Status, isDirectMessage:Boolean = false):Boolean {
+                // Only add the status reply if it is not in the replies list
+                for each (var status:Status in _statuses) {
+                    if (status.id == s.id) {
+                        // Update direct message status, just in case
+                        if (!status.isDirectMessage && isDirectMessage) {
+                            status.isDirectMessage = isDirectMessage;
+                        }
+                        // Simply exit the function if it's already in the replies
+                        return false;
+                    }
+                }
+
+                // Otherwise add the reply
+                _statuses.push(s);
+                return true;
+            }
+
+            private function getStatus(id:Number, source:Array = null):Status {
+                source = (source == null) ? _statuses : source;
+                for each (var status:Status in source) {
+                    if (status.id == id) {
+                        return status;
+                    }
+                }
+
+                return null;
+            }
+
+            private function containsStatus(id:Number, source:Array = null):Boolean {
+                source = (source == null) ? _statuses : source;
+                for each (var status:Status in source) {
+                    if (status.id == id) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            private function showAppConfigDialog():AppConfig {
+                var w:AppConfig = new AppConfig();
+                w.width = 300;
+                w.height = 300;
+                w.showStatusBar = false;
+                w.alwaysInFront = true;
+                w.addEventListener(AIREvent.WINDOW_DEACTIVATE, handleAppConfigClose);
+
+                w.open(true);
+
+                return w;
+            }
+
+            private function handleAppConfigClose(event:AIREvent):void {
+                //mx.controls.Alert.show("Closed");
+                // Reload the settings
+                _appConfigWindow = null;
+                loadSettings();
+                preload();
+            }
+
+            private function parseTimelineData(statusList:XMLList, target:VBox,
+                requestInterfaceKey:String = null, parseReplies:Boolean = true,
+                isDirectMessage:Boolean = false):void {
+
+                var mainNotify:Boolean = (settings.mainStreamNotify == "1")
+                var dmNotify:Boolean = (settings.directMessagesNotify == "1");
+                var numTargetChildren:Number = target.numChildren;
+                var numRepliesChildren:Number = (parseReplies) ? repliesView.numChildren : 0;
+
+                for (var i:int = (statusList.length()); i > -1; i--) {
+                    var statusData:XML = XML(statusList[i]);
+
+                    // Make sure we have a valid status id before we continue
+                    if (StringUtil.trim(String(statusData.id)) != '') {
+                        var text:String = String(statusData.text);
+                        var s:Status = new Status(Number(statusData.id),
+                            statusData.user.screen_name, statusData.user.name,
+                            text, statusData.user.profile_image_url,
+                            parseDateString(statusData.created_at),
+                            (statusData.user.following == "true"));
+                        s.isDirectMessage = isDirectMessage;
+
+                        if (text.substr(0, 1) == '@' &&
+                            (text.substr(0, text.indexOf(' ')) == '@'+settings.username)) {
+                            s.isReply = true;
+                        }
+
+                        if (addStatus(s, isDirectMessage)) {
+                            if (s.id > _latestStatusID) {
+                                _numNewUpdates += 1;
+                            }
+
+                            // Queue the notifications
+                            if (requestInterfaceKey == FTIMELINE_RI && mainNotify && s.id > _latestStatusID) {
+                                _notifier.queueNotification(s, _statusCSS);
+                            }
+
+                            /*if (requestInterfaceKey == PTIMELINE_RI && settings.publicTimelineNotify == "1") {
+                                _notifier.queueNotification(queueStatus, _statusCSS);
+                            }*/
+
+                            if (requestInterfaceKey == DMESSAGES_RI && dmNotify && s.id > _latestStatusID) {
+                                _notifier.queueNotification(s, _statusCSS);
+                            }
+                        }
+
+                        if (isDirectMessage) {
+                            if (s.id > _latestStatusID) {
+                                _numNewDirect += 1;
+                            }
+                        }
+
+                        createStatusBox(s, target, (
+                            (getRequestInterface(requestInterfaceKey).nextPageRequest) ?
+                            (numTargetChildren - 1) : ((requestInterfaceKey != UTIMELINE_RI) ? 0 : 1)
+                        ));
+
+                        if (getRequestInterface(requestInterfaceKey).nextPageRequest) {
+                            createStatusBox(s, target, (numTargetChildren-1));
+                        } else {
+                            createStatusBox(s, target, 0);
+                        }
+
+
+                        if (parseReplies && s.isReply) {
+                            createStatusBox(s, repliesView, (
+                                (getRequestInterface(requestInterfaceKey).nextPageRequest) ?
+                                numRepliesChildren : 0)
+                            );
+
+                            if (s.id > _latestStatusID) {
+                                _numNewReplies += 1;
+                            }
+                        }
+                    }
+                }
+
+                // Display the notifications stacked
+                _notifier.displayStackedNotifications();
+
+                setStatus(getSingularPlural('update', _numNewUpdates) + ", "
+                    + getSingularPlural("reply", _numNewReplies) + ", "
+                    + getSingularPlural("direct", _numNewDirect));
+            }
+
+            private function getSingularPlural(word:String, value:Number):String {
+                var plural:String = word+"s";
+
+                if (word.substr(word.length-1) == 'y') {
+                    plural = word.substr(0, word.length-1)+"ies";
+                }
+
+                return value.toString() + " " + ((value == 1) ? word : plural);
+            }
+
+            protected override function createChildren():void {
+                super.createChildren();
+                configButton.setStyle("upSkin", configButtonUpSkin);
+                configButton.setStyle("overSkin", configButtonAltSkin);
+                configButton.setStyle("downSkin", configButtonUpSkin);
+
+                updateTextToggle.setStyle("upSkin", toggleButtonUpSkin);
+                updateTextToggle.setStyle("overSkin", toggleButtonAltSkin);
+                updateTextToggle.setStyle("downSkin", toggleButtonUpSkin);
+                updateTextToggle.setStyle("selectedUpSkin", toggleButtonSelectedUpSkin);
+                updateTextToggle.setStyle("selectedOverSkin", toggleButtonSelectedAltSkin);
+                updateTextToggle.setStyle("selectedDownSkin", toggleButtonSelectedUpSkin);
+
+                refreshButton.setStyle("upSkin", refreshButtonUpSkin);
+                refreshButton.setStyle("overSkin", refreshButtonAltSkin);
+                refreshButton.setStyle("downSkin", refreshButtonUpSkin);
+            }
+
+            private function handleKeyUp(event:KeyboardEvent):void {
+                updateText.text = updateText.text.replace("\r", "");
+                updateText.text = updateText.text.replace("\n", "");
+
+                //event.keyCode ==
+                if(event.keyCode == 13) {
+                    // Send the request with the data
+                    // Replace newlines
+                    sendRequest(UPDATE_RI, 'status='+escape(updateText.text), 'POST');
+                    updateText.enabled = false;
+                } else {
+                    _charactersLeft = 140 - updateText.text.length;
+                }
+            }
+
+            private function toggleUpdateTextVisible(forceShow:Boolean = false):void {
+                var resize:Resize = new Resize(updateText);
+                resize.duration = 500;
+
+                if (forceShow) {
+                    updateTextToggle.selected = false;
+                }
+
+                if (updateTextToggle.selected) {
+                    resize.heightFrom = 70;
+                    resize.heightTo = 0;
+                    resize.play();
+                } else {
+                    if (updateText.height == 0) {
+                        resize.heightFrom = 0;
+                        resize.heightTo = 70;
+                        resize.play();
+                    }
+                }
+            }
+
+            private function handleLookupEvent(event:LookupEvent):void {
+                // Send the lookup request
+                if (_currentLookupUser != event.username) {
+                _currentLookupUser = event.username;
+                    sendRequest(LOOKUP_RI, "id="+escape(_currentLookupUser));
+                    sendRequest(UTIMELINE_RI, getUserTimelineParam());
+                }
+                screens.selectedChild = lookupView;
+            }
+
+            private function handleNotificationClicked(event:NotificationClickedEvent):void {
+                // Find the appropriate status box with this status
+                var views:Array = [homeView, ptView, dmView];
+                for each (var view:ScreenView in views) {
+                    for (var i:int = 0; i < view.numChildren; i++) {
+                        var sbox:StatusBox = StatusBox(view.getChildAt(i));
+                        if (sbox.status.id == event.status.id) {
+                            sbox.setSelected();
+                            screens.selectedChild = view;
+                            nativeWindow.activate();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            private function createStatusBox(status:Status, target:DisplayObjectContainer, idx:int=-1):StatusBox {
+                for (var i:int = 0; i < target.numChildren; i++) {
+                    var child:StatusBox = target.getChildAt(i) as StatusBox;
+                    if (child != null && child.status.id == status.id) {
+                        // Make sure the status box doesn't alredy exist in the container
+                        return null;
+                    }
+                }
+
+                // The child does not already exist, so add
+                var sbox:StatusBox = new StatusBox();
+                sbox.status = status;
+                sbox.stylesheet = _statusCSS;
+                sbox.addEventListener(LookupEvent.LOOKUP, handleLookupEvent);
+                sbox.addEventListener(MouseEvent.CLICK, handleStatusMouseClick);
+                sbox.addEventListener(ProfileImage.DIRECT_MESSAGE, handleDirectMessageClick);
+                sbox.addEventListener(ProfileImage.REPLY, handleReplyClick);
+
+                if (idx > -1 && idx <= (target.numChildren - 1)) {
+                    // Make sure we don't go out of bounds
+                    target.addChildAt(sbox, idx);
+                } else {
+                    target.addChild(sbox);
+                }
+
+                return sbox;
+            }
+
+            private function handleStatusMouseClick(event:MouseEvent):void {
+                StatusBox(event.currentTarget).toggleSelected();
+                //trace(event.currentTarget);
+                //trace("Mouse down detected.");
+            }
+
+            private function handleDirectMessageClick(event:Event):void {
+                toggleUpdateTextVisible(true);
+
+                if (event.currentTarget is StatusBox) {
+                    updateText.text = "d "+StatusBox(event.currentTarget).status.screenName;
+                } else if (event.currentTarget is PersonBox) {
+                    updateText.text = "d "+PersonBox(event.currentTarget).person.screenName;
+                }
+
+                updateText.text += " ";
+                scrollToUpdateTextEnd();
+            }
+
+            private function handleReplyClick(event:Event):void {
+                toggleUpdateTextVisible(true);
+
+                if (event.currentTarget is StatusBox) {
+                    updateText.text = "@"+StatusBox(event.currentTarget).status.screenName;
+                } else if (event.currentTarget is PersonBox) {
+                    updateText.text = "@"+PersonBox(event.currentTarget).person.screenName;
+                }
+
+                updateText.text += " ";
+                scrollToUpdateTextEnd();
+            }
+
+            private function scrollToUpdateTextEnd():void {
+                updateText.selectionBeginIndex = updateText.length;
+                updateText.selectionEndIndex = updateText.length;
+                updateText.setFocus();
+            }
+
+            private function refreshView():void {
+                switch (screens.selectedChild) {
+                    case homeView:
+                        _numNewUpdates=0;
+                        _numNewReplies=0;
+
+                        // Only do a refresh to get the first page
+                        getRequestInterface(FTIMELINE_RI).resetPage();
+                        sendRequest(FTIMELINE_RI);
+
+                        break;
+
+                    case ptView:
+                        _numNewUpdates=0;
+                        _numNewReplies=0;
+
+                        getRequestInterface(PTIMELINE_RI).resetPage();
+                        sendRequest(PTIMELINE_RI);
+
+                        break;
+
+                    case dmView:
+                        _numNewDirect = 0;
+
+                        getRequestInterface(DMESSAGES_RI).resetPage();
+                        sendRequest(DMESSAGES_RI);
+
+                        break;
+
+                    case repliesView:
+                        break;
+
+                    case ffView:
+                        checkFFTabViews(true);
+                        break;
+
+                    case lookupView:
+                        if (_currentLookupUser != null) {
+                            sendRequest(LOOKUP_RI, "id="+escape(_currentLookupUser));
+                            sendRequest(UTIMELINE_RI, getUserTimelineParam());
+                        }
+                    break;
+                }
+            }
+
+            private function handleViewChange(event:Event):void {
+                switch (screens.selectedChild) {
+                    case homeView:
+                        _numNewUpdates=0;
+                        _numNewReplies=0;
+                         // Only send the request if no data has been loaded yet
+                         if (getRequestInterface(FTIMELINE_RI).requestData == null) {
+                            sendRequest(FTIMELINE_RI, null, "GET", _rInterval);
+                         }
+                    break;
+
+                    case ptView:
+                        _numNewUpdates=0;
+                        _numNewReplies=0;
+                        if (getRequestInterface(PTIMELINE_RI).requestData == null) {
+                            sendRequest(PTIMELINE_RI, null, "GET", _rInterval);
+                        }
+                    break;
+
+                    case repliesView:
+                        if (getRequestInterface(PTIMELINE_RI).requestData == null) {
+                            sendRequest(FTIMELINE_RI, null, "GET", _rInterval);
+                        }
+                    break;
+
+                    case dmView:
+                        _numNewDirect = 0;
+                        if (getRequestInterface(DMESSAGES_RI).requestData == null) {
+                            sendRequest(DMESSAGES_RI, null, "GET", _rInterval);
+                        }
+                    break;
+
+                    case ffView:
+                        // Following is the default view for Following/Followers
+                        if (getRequestInterface(FRIENDS_RI).requestData == null) {
+                            sendRequest(FRIENDS_RI);
+                        }
+                        checkFFTabViews(true);
+                        break;
+
+                    case lookupView:
+                        if (_currentLookupUser != null) {
+                            sendRequest(LOOKUP_RI, "id="+escape(_currentLookupUser));
+                            sendRequest(UTIMELINE_RI, getUserTimelineParam());
+                        }
+                    break;
+                }
+            }
+
+            private function getUserTimelineParam():String {
+                return (_currentLookupUser != settings.username) ? "id="+escape(_currentLookupUser) : null;
+            }
+
+            private function checkFFTabViews(refresh:Boolean = false):void {
+                //trace("refresh="+refresh);
+                switch (ffViewTabNav.selectedChild) {
+                    case friendsView:
+                        var fRI:RequestInterface = getRequestInterface(FRIENDS_RI);
+                        if (fRI.requestData == null || refresh) {
+                            sendRequest(FRIENDS_RI);
+                        }
+                    break;
+
+                    case followersView:
+                        var foRI:RequestInterface = getRequestInterface(FOLLOWERS_RI);
+                        if (foRI.requestData == null || refresh) {
+                            sendRequest(FOLLOWERS_RI);
+                        }
+                    break;
+                }
+            }
+
+            private function setStatus(text:String, error:Boolean = false):void {
+                statusText.setStyle('color', (error) ? '#FF0000' : '#777777');
+                statusText.text = text;
+            }
+
+            private function handleMouseWheel(event:MouseEvent):void {
+                //trace("currentTarget="+event.delta);
+            }
+
+            private function getMaxStatusId():Number {
+                var maxId:Number = 0;
+                for each (var status:Status in _statuses) {
+                    maxId = Math.max(status.id, maxId);
+                }
+
+                return maxId;
+            }
+
+            private function handleClosing(event:Event):void {
+                //trace("Writing status data.");
+                writeLastStatusData();
+            }
+
+            private function writeLastStatusData():void {
+                // Update the latest status time
+                _latestStatusID = Math.max(getMaxStatusId(), _latestStatusID);
+
+                // Write the file
+                var file:File = File.applicationStorageDirectory.resolvePath(LATEST_STATUS);
+                var fs:FileStream = new FileStream();
+                fs.open(file, FileMode.WRITE);
+                fs.writeMultiByte(_latestStatusID.toString(), "utf-8");
+                fs.close();
+            }
+
+            private function addPaginateListeners(event:FlexEvent):void {
+                for each (var displayObject:DisplayObject in screens.getChildren()) {
+                    if (displayObject is ScreenView && ScreenView(displayObject).paginate) {
+                        /*displayObject.addEventListener(ScreenView.PREVIOUS_PAGE, handlePreviousPage);
+                        displayObject.addEventListener(ScreenView.NEXT_PAGE, handleNextPage);*/
+                        displayObject.addEventListener(ScreenView.OLDER_UPDATES, handleOlderUpdates);
+                    }
+                }
+            }
+
+            /*private function handlePreviousPage(event:Event):void {
+                var srcView:ScreenView = ScreenView(event.currentTarget);
+                switch (srcView) {
+                    case homeView: getRequestInterface(FTIMELINE_RI).requestPrevPage(); break;
+                    case ptView: getRequestInterface(PTIMELINE_RI).requestPrevPage(); break;
+                    case dmView: getRequestInterface(DMESSAGES_RI).requestPrevPage(); break;
+                }
+            }
+
+            private function handleNextPage(event:Event):void {
+                var srcView:ScreenView = ScreenView(event.currentTarget);
+                switch (srcView) {
+                    case homeView: getRequestInterface(FTIMELINE_RI).requestNextPage(); break;
+                    case ptView: getRequestInterface(PTIMELINE_RI).requestNextPage(); break;
+                    case dmView: getRequestInterface(DMESSAGES_RI).requestNextPage(); break;
+                }
+            }*/
+
+            private function handleOlderUpdates(event:Event):void {
+                var srcView:ScreenView = ScreenView(event.currentTarget);
+                switch (srcView) {
+                    case homeView: getRequestInterface(FTIMELINE_RI).requestNextPage(); break;
+                    case ptView: getRequestInterface(PTIMELINE_RI).requestNextPage(); break;
+                    case dmView: getRequestInterface(DMESSAGES_RI).requestNextPage(); break;
+                }
+                var keyPressEvent:KeyboardEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
+                keyPressEvent.keyCode = 20;
+            }
+
+            // Keyboard shortcuts are officially awesome.
+            private function handleKeyPress(event:KeyboardEvent):void {
+                // F5 or Ctrl+R should refresh views
+                if (event.keyCode == 116 || (event.ctrlKey && event.keyCode == 82)) {
+                    refreshView();
+                }
+
+                // Ctrl+U brings focus into update box
+                if (event.ctrlKey && event.keyCode == 85) {
+                    toggleUpdateTextVisible(true);
+                    updateText.setFocus();
+                }
+            }
+
+            private static function parseDateString(dt:String):Date {
+                // Split the string first
+                var dtParts:Array = dt.split(' ');
+                // The date string from the API is in UTC
+                // Date Parts:
+                // [0] = day name
+                // [1] = 3-char month name
+                // [2] = day of month
+                // [3] = hours:minutes:seconds
+                // [4] = timezone offset
+                // [5] = year
+                var timeParts:Array = String(dtParts[3]).split(':');
+
+                var date:Date = new Date();
+
+                // Workaround for API timezone offset alternating bug
+                if (dtParts[4] == '+0000') { // UTC timezone detected
+                    date.dateUTC = dtParts[2];
+                    date.monthUTC = getMonthIndex(dtParts[1]);
+                    date.fullYearUTC = dtParts[5];
+                    date.hoursUTC = timeParts[0];
+                    date.minutesUTC = timeParts[1];
+                    date.secondsUTC = timeParts[2];
+                } else {
+                    date.date = dtParts[2];
+                    date.month = getMonthIndex(dtParts[1]);
+                    date.fullYear = dtParts[5];
+                    date.hours = timeParts[0];
+                    date.minutes = timeParts[1];
+                    date.seconds = timeParts[2];
+                }
+
+                return date;
+            }
+
+            private static function getMonthIndex(name:String):Number {
+                return _months.indexOf(name);
+            }
+        ]]>
+    </mx:Script>
+
+    <chrome:CustomChrome top="0" left="0" right="0" bottom="0" backgroundAlpha="{_transparencyEnabled ? 0.9 : 1.0}" />
+
+    <chrome:ControlBar id="appControlBar" top="0" left="0" mouseDown="nativeWindow.startMove()" />
+
+    <mx:VBox width="100%" height="100%" top="40" verticalGap="0">
+
+    <mx:HBox verticalAlign="middle" horizontalGap="40" width="100%"
+        paddingLeft="5" paddingRight="5" paddingTop="2" paddingBottom="2"
+        styleName="gradientBg">
+        <presently:Toolbar dataProvider="{screens}" />
+        <mx:HBox horizontalGap="6">
+            <mx:LinkButton id="refreshButton" click="refreshView()" toolTip="Refresh" />
+            <mx:LinkButton id="configButton" click="showAppConfigDialog()" toolTip="Settings" />
+        </mx:HBox>
+    </mx:HBox>
+
+    <mx:VBox width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="auto"
+        paddingLeft="5" paddingRight="0">
+
+    <mx:ViewStack id="screens" paddingLeft="0" paddingRight="0" width="100%" height="100%" creationPolicy="all"
+        change="handleViewChange(event)" creationComplete="addPaginateListeners(event)">
+        <presently:ScreenView id="homeView" toolTip="Main Stream" paddingTop="5" paddingBottom="5" paginate="true" />
+        <presently:ScreenView id="ptView" toolTip="Public Timeline" paddingTop="5" paddingBottom="5" paginate="true" />
+        <presently:ScreenView id="repliesView" toolTip="Replies" paddingTop="5" paddingBottom="5" />
+        <presently:ScreenView id="dmView" toolTip="Direct Messages" paddingTop="5" paddingBottom="5" paginate="true" />
+        <mx:VBox id="ffView" toolTip="Following/Followers" paddingRight="0" paddingTop="5" paddingBottom="5">
+            <presently:TabNav id="ffViewTabNav" change="checkFFTabViews()" >
+                <mx:VBox id="friendsView" label="Following" paddingLeft="5" paddingRight="5" />
+                <mx:VBox id="followersView" label="Followers" paddingLeft="5" paddingRight="5" />
+            </presently:TabNav>
+        </mx:VBox>
+        <presently:ScreenView id="lookupView" toolTip="Lookup"
+            paddingRight="5" paddingTop="5" paddingBottom="5">
+            <presently:PersonBox visible="false"  />
+        </presently:ScreenView>
+    </mx:ViewStack>
+
+    </mx:VBox>
+
+    <mx:VBox horizontalGap="0" verticalGap="0" paddingTop="10" horizontalAlign="right"
+        width="100%" paddingLeft="7" paddingRight="7" paddingBottom="5" styleName="transparentGradientBg">
+        <mx:TextArea id="updateText" width="100%" height="70" keyUp="handleKeyUp(event)"
+            borderStyle="none" backgroundAlpha="0.8" backgroundColor="0xffffff"
+            disabledColor="0x444444" />
+        <mx:HBox verticalAlign="middle" paddingTop="5">
+            <mx:LinkButton id="updateTextToggle" toolTip="Toggle text area" toggle="true"
+                click="toggleUpdateTextVisible()" />
+            <mx:Text fontSize="9" textAlign="right" color="0x777777" text="{_charactersLeft}" />
+        </mx:HBox>
+    </mx:VBox>
+
+    <mx:Spacer height="24" />
+
+    </mx:VBox>
+
+    <!-- Status bar -->
+    <mx:HBox horizontalAlign="right" bottom="0" width="100%" backgroundColor="#111111"
+        height="25" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" verticalAlign="middle"
+        borderStyle="solid" borderSides="top" borderColor="#333333">
+        <mx:Label id="statusText" width="100%" color="0x777777" fontSize="9" />
+        <mx:Image source="@Embed('assets/icons/icon_gripper.png')"
+            mouseDown="stage.nativeWindow.startResize(NativeWindowResize.BOTTOM_RIGHT)" buttonMode="true"
+            mouseEnabled="true" useHandCursor="true" />
+    </mx:HBox>
+
+</mx:WindowedApplication>

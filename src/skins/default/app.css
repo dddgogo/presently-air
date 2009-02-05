@@ -1,0 +1,87 @@
+/* CSS file */
+CustomChrome {
+    backgroundColor: #111111;
+    backgroundAlpha: "0.9";
+    cornerRadius: "10";
+    borderStyle: "solid";
+    borderColor: #000000
+}
+
+ControlBar {
+    borderStyle: "solid";
+    borderColor: #111111;
+    backgroundColor: #111111;
+    backgroundAlpha: "1.0";
+    cornerRadius: "10"
+}
+
+.gradientBg
+{
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #444444, #000000;
+    fillAlphas: 1.0, 1.0
+}
+
+.transparentGradientBg
+{
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #444444, #000000;
+    fillAlphas: 0.7, 0.7
+}
+
+StatusBox {
+    borderStyle: "solid";
+    cornerRadius: "5"
+}
+
+StatusBox.default {
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #333333, #222222;
+    fillAlphas: 0.7, 0.7;
+    borderColor: #333333
+}
+
+StatusBox.reply {
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #2d441e, #1e3112;
+    fillAlphas: 0.7, 0.7;
+    borderColor: #2d441e
+}
+
+StatusBox.direct {
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #573f00, #442e00;
+    fillAlphas: 0.7, 0.7;
+    borderColor: #573f00
+}
+
+.defaultNotification {
+    backgroundColor: #111111;
+    borderColor: #222222;
+    backgroundAlpha: '0.9'
+}
+
+.replyNotification {
+    backgroundColor: #1e3112;
+    borderColor: #222222;
+    backgroundAlpha: '0.9'
+}
+
+.directNotification {
+    backgroundColor: #442e00;
+    borderColor: #222222;
+    backgroundAlpha: '0.9'
+}
+
+PersonBox {
+    backgroundImage: ClassReference("com.presently.appearance.GradientBackground");
+    backgroundSize: "100%";
+    fillColors: #444444, #222222;
+    fillAlphas: 0.7, 0.7;
+    borderColor: #444444
+}

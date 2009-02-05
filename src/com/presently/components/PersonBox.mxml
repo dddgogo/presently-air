@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Present.ly AIR application
+ *
+ * Copyright (c) 2008. All rights reserved.
+ * Author: Akinwale Ariwodola
+ * Version: 1.0
+ *
+ */
+-->
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:presently="com.presently.components.*"
+    width="100%" height="150" backgroundColor="0x333333" borderStyle="solid" borderColor="0x333333"
+    cornerRadius="5" paddingLeft="5" paddingTop="5" verticalScrollPolicy="off" creationPolicy="all"
+    useHandCursor="true">
+    <mx:Script>
+        <![CDATA[
+            import mx.charts.chartClasses.DataDescription;
+            import com.presently.events.LookupEvent;
+            import com.presently.model.Person;
+
+            [Bindable]
+            private var _person:Person;
+
+            [Bindable]
+            private var _stylesheet:StyleSheet = new StyleSheet();
+
+            public function set stylesheet(css:StyleSheet):void {
+                _stylesheet = css;
+            }
+
+            public function set person(value:Person):void {
+                _person = value;
+            }
+
+            public function get person():Person {
+                return _person;
+            }
+
+            private function handleLinkClick(event:TextEvent):void {
+                if (event.text.substr(0, 7) == 'lookup;') {
+                    var username:String = event.text.substr(7);
+                    dispatchEvent(new LookupEvent(username));
+                } else {
+                    navigateToURL(new URLRequest(event.text));
+                }
+            }
+
+            private function lookup():void {
+                dispatchEvent(new LookupEvent(_person.screenName));
+            }
+
+            private function handleProfileImageEvent(event:Event):void {
+                if (event.type == ProfileImage.LOOKUP) {
+                    // Dispatch the event for lookup
+                    lookup();
+                } else {
+                    // Otherwise, re-dispatch the event
+                    dispatchEvent(event);
+                }
+            }
+
+            protected override function childrenCreated():void {
+                super.childrenCreated();
+
+                profileimage.addEventListener(ProfileImage.DIRECT_MESSAGE, handleProfileImageEvent);
+                profileimage.addEventListener(ProfileImage.LOOKUP, handleProfileImageEvent);
+                profileimage.addEventListener(ProfileImage.REPLY, handleProfileImageEvent);
+            }
+        ]]>
+    </mx:Script>
+
+    <presently:ProfileImage id="profileimage" source="{_person.profileImageUrl}" following="{_person.isFollowing}" />
+    <mx:VBox width="100%" height="100%" paddingRight="5" color="0xffffff" verticalGap="2">
+        <mx:Text fontSize="16" color="0x24a449" fontWeight="bold" text="{_person.screenName}"
+            click="lookup()" useHandCursor="true" buttonMode="true" mouseChildren="false" />
+        <presently:MultilineText id="st" htmlText="{_person.toHTMLString()}"
+            width="100%" height="100%" fontSize="10" color="0xcccccc" borderStyle="none"
+            backgroundAlpha="0.0" backgroundColor="0x333333" styleSheet="{_stylesheet}"
+            link="handleLinkClick(event)"/>
+    </mx:VBox>
+</mx:HBox>
