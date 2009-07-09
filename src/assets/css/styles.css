@@ -1,0 +1,653 @@
+/*
+ Copyright (c) 2009 Intridea. All Rights Reserved.
+ 
+ @project  Intridea: Present.ly AIR Client
+ @version  2.1.1
+ @author   Sean Moore (for Intridea)
+ 
+ @internal
+ */
+ 
+ 
+/**
+ *
+ * Embed Arial into the application for the primary font. Enables Fade effects
+ * to be applied to dynamic text fields such as Labels.
+ *
+ */
+@font-face {
+    src:url("../fonts/arial.ttf");
+    fontWeight: normal;
+    font-family: "Arial";
+}
+
+/**
+ *
+ * Also embed Arial bold. Used in conjunction with the 'normal' fontWeight.
+ *
+ */
+@font-face {
+    src:url("../fonts/arialbd.ttf");
+    fontWeight: bold;
+    font-family: "Arial";
+}
+
+/**
+ *
+ */
+Application {
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+	theme-color: #9bf175;
+}
+
+/**
+ *
+ */
+Button {
+	font-family: Arial;	
+}
+
+/**
+ *
+ */
+Label {
+	font-family: Arial;
+}
+
+/**
+ *
+ */
+LinkButton {
+	font-family: Arial;
+}
+
+/**
+ *
+ */
+VScrollBar {
+	down-arrow-skin: Embed(source="../images/scroll-down-arrow.png");
+	up-arrow-skin: Embed(source="../images/scroll-up-arrow.png");
+	track-skin: Embed(source="../images/scroll-track.png");
+	track-disabled-skin: Embed(source="../images/scroll-track.png");
+	thumb-skin: Embed(source="../images/scroll-thumb.png",
+						scaleGridLeft="5", 
+						scaleGridRight="7", 
+						scaleGridTop="5", 
+						scaleGridBottom="7");
+}
+
+/**
+ *
+ */
+.titleBarBox {
+	padding-right: 8;
+	padding-bottom: 6;
+}
+
+/**
+ *
+ */
+.titleBarCloseWindowButton
+{
+	up-skin: Embed("../images/close-window.png");
+	down-skin: Embed("../images/close-window.png");
+	over-skin: Embed("../images/close-window-over.png");
+}
+
+/**
+ *
+ */
+.titleBarMinimizeWindowButton
+{
+	up-skin: Embed("../images/minimize-window.png");
+	down-skin: Embed("../images/minimize-window.png");
+	over-skin: Embed("../images/minimize-window-over.png");
+}
+
+/**
+ *
+ */
+.userAccount {
+	font-size: 10;
+ 	font-weight: bold;
+ 	color: #b2d56b;
+}
+
+/**
+ *
+ */ 
+.viewTitle {
+	font-size: 14;
+ 	font-weight: bold;
+ 	color: #a4a4a4;
+}
+
+/**
+ *
+ */ 
+.loginTitle {
+	font-size: 13;
+ 	color: #9abaa0;
+ 	padding-left: 17;
+ 	padding-top: 5;
+} 	
+
+/**
+ *
+ */
+.loginForm {
+	padding-top: 8;	
+}
+
+/**
+ *
+ */
+.loginBox {
+	/*background-color: #4c4c4c;*/
+	background-color: #313131;
+	border-style: solid;
+	border-thickness: 0;
+	corner-radius: 5;
+}
+
+/**
+ *
+ */
+.loginFormTextInput {
+	background-color: #ffffff; /*4c4c4c*/
+	background-alpha: 0.1;
+	border-style: solid;
+	corner-radius: 5;
+	color: #deffe4;
+	drop-shadow-enabled: true;
+	drop-shadow-color: #343434;
+	shadow-direction: center;
+	shadow-distance: 1;
+	font-size: 12;
+}
+
+/**
+ *
+ */
+.loginFormLabel {
+	font-size: 12;
+	color: #a4c2ac;
+	text-roll-over-color: #a4c2ac;
+	text-selected-color: #a4c2ac; 
+}
+
+/**
+ *
+ */
+.registerLink {
+	/*
+	Setting the skin to mx.skins.ProgrammaticSkin resets the skin which 
+	removes the rollover color for the LinkButton.
+	*/
+	skin: ClassReference("mx.skins.ProgrammaticSkin");
+	color: #80ad8c;
+	text-selected-color: #80ad8c; 
+	text-roll-over-color: #a0d9af;
+}
+
+/**
+ *
+ */
+.mainButton {
+	up-skin: Embed(source="../images/main-button-skin.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+	
+	down-skin: Embed(source="../images/main-button-skin.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+	
+	over-skin: Embed(source="../images/main-button-skin-over.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+						
+	disabled-skin: Embed(source="../images/main-button-skin-disabled.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+						
+	color: #9ebaa7;
+	text-roll-over-color: #b2d2bd;
+	font-size: 11;
+}
+
+/**
+ *
+ */
+.mainStreamButton {
+	up-skin		  : Embed(source="../images/main-stream-button.png");
+	down-skin	  : Embed(source="../images/main-stream-button.png");
+	over-skin	  : Embed(source="../images/main-stream-button-over.png");
+	disabled-skin : Embed(source="../images/main-stream-button-disabled.png");
+}
+
+/**
+ *
+ */
+.publicTimelineButton {
+	up-skin		  : Embed(source="../images/public-timeline-button.png");
+	down-skin	  : Embed(source="../images/public-timeline-button.png");
+	over-skin	  : Embed(source="../images/public-timeline-button-over.png");
+	disabled-skin : Embed(source="../images/public-timeline-button-disabled.png");
+}
+
+/**
+ *
+ */
+.directMessagesButton {
+	up-skin		  : Embed(source="../images/direct-messages-button.png");
+	down-skin	  : Embed(source="../images/direct-messages-button.png");
+	over-skin	  : Embed(source="../images/direct-messages-button-over.png");
+	disabled-skin : Embed(source="../images/direct-messages-button-disabled.png");
+}
+
+/**
+ *
+ */
+.repliesButton {
+	up-skin		  : Embed(source="../images/replies-button.png");
+	down-skin	  : Embed(source="../images/replies-button.png");
+	over-skin	  : Embed(source="../images/replies-button-over.png");
+	disabled-skin : Embed(source="../images/replies-button-disabled.png");
+}
+
+/**
+ *
+ */
+.followingFollowersButton {
+	up-skin		  : Embed(source="../images/following-followers-button.png");
+	down-skin	  : Embed(source="../images/following-followers-button.png");
+	over-skin	  : Embed(source="../images/following-followers-button-over.png");
+	disabled-skin : Embed(source="../images/following-followers-button-disabled.png");
+}
+
+/**
+ *
+ */
+.lookupButton {
+	up-skin		  : Embed(source="../images/lookup-button.png");
+	down-skin	  : Embed(source="../images/lookup-button.png");
+	over-skin	  : Embed(source="../images/lookup-button-over.png");
+	disabled-skin : Embed(source="../images/lookup-button-disabled.png");
+}
+
+/**
+ *
+ */
+.settingsButton {
+	up-skin		  : Embed(source="../images/settings-button.png");
+	down-skin	  : Embed(source="../images/settings-button.png");
+	over-skin	  : Embed(source="../images/settings-button-over.png");
+	disabled-skin : Embed(source="../images/settings-button-disabled.png");
+}
+
+/**
+ *
+ */
+.refreshButton {
+	up-skin		  : Embed(source="../images/refresh-button.png");
+	down-skin	  : Embed(source="../images/refresh-button.png");
+	over-skin	  : Embed(source="../images/refresh-button-over.png");
+	disabled-skin : Embed(source="../images/refresh-button-disabled.png");
+}
+
+/**
+ *
+ */
+.toolBarBox {
+	padding-left: 10;
+	padding-right: 10;
+	padding-top: 5;
+	padding-bottom: 5;
+	background-color: #232323;
+}
+
+/**
+ *
+ */
+.titleBarBox {
+	padding-bottom: 5;
+}
+
+/**
+ *
+ */
+.sendTextUpdateControlsBox {
+	padding-top: 10;
+	padding-left: 10;
+	padding-right: 10;	
+}
+
+/**
+ *
+ */
+.textUpdateTextInput {
+	font-size: 12;
+	background-alpha: 0.05;
+	border-style: solid;
+	border-alpha: 0.05;
+	corner-radius: 8;
+	focusRoundedCorners: "tl tr bl br";
+	color: #9bf175;
+	padding-right: 6;
+	padding-left: 6;
+	padding-top: 2;
+	padding-bottom: 2;
+}
+
+/**
+ *
+ */
+.statusBar {
+	padding-right: 5;
+	padding-bottom: 5;
+}
+
+/**
+ *
+ */
+.statusText {
+	color: #839e88;
+	text-align: right;
+}
+
+/**
+ *
+ */
+.logoutLinkButton {
+	/*
+	Setting the skin to mx.skins.ProgrammaticSkin resets the skin which 
+	removes the rollover color for the LinkButton.
+	*/
+	skin: ClassReference("mx.skins.ProgrammaticSkin");
+	disabled-color: #404040;
+	color: #4f9164;
+	text-roll-over-color: #01912e;
+	font-size: 9;
+}
+
+/**
+ *
+ */
+.mainViewStack {
+	padding-right: 2;
+}
+
+/**
+ *
+ */
+.statusesTimelineTileList {	
+	background-alpha: 0;
+	border-style: none;
+	padding-bottom: 0;
+	padding-right: 5;
+	padding-left: 5;
+	use-roll-over: false;
+	selection-color: #151515;
+}
+
+/**
+ *
+ */
+.statusesTimelineRendererBox {
+	background-color: #343434;
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #404040;
+	corner-radius: 5;
+	padding-left: 5;
+	padding-top: 5;
+}
+
+/**
+ *
+ */
+.statusesTimelineStatusText {
+	background-alpha: 0;
+	border-style: none;
+	color: #838383;
+	font-size: 11;
+	text-align: left;
+}
+
+/**
+ *
+ */
+.statusCreatedAtLabel {
+	color: #888888;
+	font-size: 10;
+}
+
+/**
+ *
+ */
+.textUpdateCharsLeft {
+	font-size: 9;
+	color: #515151;	
+}
+
+/**
+ *
+ */
+.username {
+	font-size: 14;
+	font-weight: bold;
+	color: #6fca2c;
+}
+
+/**
+ *
+ */
+.name {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.description {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.location {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.friendsCount {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.followersCount {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.statusesCount {
+	font-size: 11;
+	color: #ffffff;
+}
+
+/**
+ *
+ */
+.friendsFollowersCountLabel {
+	font-size: 11;
+	color: #898989;
+}
+
+/**
+ *
+ */
+.friendsFollowersRendererBox {
+	background-color: #343434;
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #404040;
+	corner-radius: 5;
+	padding-left: 5;
+	padding-top: 5;
+}
+
+/**
+ *
+ */
+.friendsFollowersTileList {	
+	background-alpha: 0;
+	border-style: none;
+	padding-bottom: 0;
+	padding-right: 5;
+	padding-left: 5;
+	use-roll-over: false;
+	selection-color: #151515;
+}
+
+/**
+ *
+ */
+.userLookUpTextInput {
+	font-size: 12;
+	background-alpha: 0.05;
+	border-style: solid;
+	border-alpha: 0.05;
+	corner-radius: 5;
+	focusRoundedCorners: "tl tr bl br";
+	color: #9bf175;
+}
+
+/**
+ *
+ */
+.userLookupTextInputBox {
+	padding-left: 10;
+	padding-top: 4;	
+}
+
+/**
+ *
+ */
+.settingsLabel {
+	font-size: 13;
+	color: #d1d1d1;
+	text-roll-over-color: #d1d1d1;
+	text-selected-color: #d1d1d1; 	
+}
+
+/**
+ *
+ */
+.settingsTitleLabel {
+	font-size: 14;
+	color: #d1d1d1;
+	font-weight: bold;
+}
+
+/**
+ *
+ */
+.settingsBox {
+	padding-left: 10;
+	padding-right: 10;
+	padding-top: 10;
+}
+
+/**
+ * Used in settings view.
+ */
+.notificationsBox { 
+	padding-top: 5;
+	padding-left: 5;
+	padding-bottom: 5;
+	border-style: "solid"; 
+	border-color: #cccccc;
+	corner-radius: 5;
+}
+
+/**
+ * Main notification window style settings.
+ */
+.notificationWindowBox {
+	border-style: solid; 
+    border-sides: bottom; 
+    border-color: #000000; 
+    corner-radius: 5;	
+}
+
+/**
+ * Remove background and border from notification text area. 
+ * Also sets font size for all notification windows.
+ */
+.notificationWindowTextArea {
+	font-size: 10;
+    background-alpha: 0.0;
+    border-style: none;
+}
+
+/**
+ * Text styles for notification windows.
+ */
+.defaultNotification {
+    background-color: #434343;
+    color: #b5b5b5;
+    border-color: #222222;
+    padding-top: 8;
+    padding-bottom: 8;
+    padding-left: 8;
+    padding-right: 8;
+}
+
+/**
+ * Text styles for notification windows.
+ */
+.replyNotification {
+    background-color: #595959;
+    color: #b5b5b5;
+    border-color: #222222;
+    padding-top: 8;
+    padding-bottom: 8;
+    padding-left: 8;
+    padding-right: 8;
+}
+
+/**
+ * Text styles for notification windows.
+ */
+.directNotification {
+    background-color: #454c47;
+    color: #90a796;
+    border-color: #222222;
+    padding-top: 8;
+    padding-bottom: 8;
+    padding-left: 8;
+    padding-right: 8;
+}

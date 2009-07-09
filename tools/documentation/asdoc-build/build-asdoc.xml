@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<project name="Present.ly AIR Client API ASDoc build" default="main" >
+    
+	<!-- defines all values for the ASDoc compiler -->
+	<property file="asdoc.properties" />
+	
+	<!-- main target: cleans and compiles ASDocs -->
+	<target name="main" depends="clean, create-docs" />
+	
+	<!-- deletes and recreates the asdoc directory -->
+	<target name="clean" >
+	   <delete dir="${output.dir}" />
+	   <mkdir  dir="${output.dir}" />
+	</target>
+	
+	<echo message="${library.path.dir}"/>
+	<echo message="${library.path.dir}air"/>
+	<echo message="${src.base}"/>
+	<echo message="${src.dir}"/>
+	<echo message="${output.dir}"/>
+	<echo message="${libs.dir}"/>
+	
+	<!-- runs the asdoc.exe compiler on the source -->
+	<target name="create-docs" >
+		<exec executable="${asdoc.exe}" failonerror="true">
+			<arg line="-source-path   ${src.base}"    />
+			<arg line="-doc-sources   ${src.dir}"    />			
+			<arg line="-output        ${output.dir}" />
+			<arg line="-library-path '${libs.dir}'"  />			
+		    <arg line="-library-path '${library.path.dir}'" />
+			<arg line="-library-path '${library.path.dir}air'" />
+			<!-- <arg line="-exclude-classes 'com.intridea.presentlyAIRClient.view'" /> -->
+			<arg line="-footer       '${footer.copyright}'" />
+		</exec>
+	</target>
+
+</project>

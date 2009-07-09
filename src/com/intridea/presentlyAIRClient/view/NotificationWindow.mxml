@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Intridea (edited by Sean Moore)
+ *
+ */
+-->
+<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:presently="com.presently.components.*"     
+    width="352" height="85" 
+    showFlexChrome="true" showTitleBar="false" showStatusBar="false" showGripper="false"  
+    alwaysInFront="true"    
+    visible="false" transparent="true"  
+    clipContent="true"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+    addedToStage="resetStyle();"
+    showEffect="{revealEffect}"
+    closing="handleClosing(event)"     
+    creationComplete="init(event)"
+    styleName="notificationWindow">
+    
+<mx:Script>
+    <![CDATA[
+    	import mx.core.Application;
+    	import com.intridea.presentlyAIRClient.context.ApplicationContext;
+    	import com.intridea.presentlyAIRClient.events.SetSelectedViewStateEvent;
+    	import com.intridea.presentlyAIRClient.events.SetCurrentLookupUserScreenNameEvent;
+    	import com.intridea.presentlyAIRClient.events.ClearCurrentLookupUserScreenNameEvent;
+    	import com.intridea.presentlyAIRClient.vo.Status;
+        
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+        import mx.managers.CursorManager;
+        import mx.binding.utils.BindingUtils;
+        import flash.net.navigateToURL;
+        
+        [Bindable]
+        /**
+         * 
+         */        
+        private var _pStatus : Status;
+
+        [Bindable]
+        /**
+         * 
+         */
+        private var _ttl : int = 15; // Number of seconds to display
+
+        [Bindable]
+        /**
+         * 
+         */
+        private var _xPos:Number;
+
+        [Bindable]
+        /**
+         * 
+         */
+        private var _yPos:Number;
+
+		/**
+		 * 
+		 */
+        public static const NOTIFICATION_CLOSED : String = "notificationClosed";
+        
+        /**
+		 * 
+		 */
+        public function set ttl( value : int ) : void
+        {
+            _ttl = value;
+            if ( _ttl < 1 ) {
+                close();
+            }
+        }
+        
+        /**
+		 * 
+		 */
+        public function get ttl() : int
+        {
+            return _ttl;
+        }
+        
+        /**
+		 * 
+		 */
+        public function set pStatus( value : Status ) : void
+        {
+            _pStatus = value;
+        }
+        
+        /**
+		 * 
+		 */
+        public function get pStatus() : Status 
+        {
+            return _pStatus;
+        }
+        
+        /**
+		 * 
+		 */
+        public function resetStyle() : void
+        {        
+            var currentStyleName : String;
+            
+            if ( _pStatus.isReply ) {
+                currentStyleName = "replyNotification";
+            } 
+            else if ( _pStatus.isDirectMessage )
+            {
+                currentStyleName = "directNotification";
+                
+            }
+            else
+            {
+                currentStyleName = "defaultNotification";
+            }
+
+            if ( main != null ) {
+            	main.styleName = currentStyleName;
+            }
+        }
+        
+        /**
+		 * 
+		 */
+        private function init( event : FlexEvent ) : void
+        {
+        	notificationStatusTextArea.addEventListener( TextEvent.LINK, notificationStatusTextAreaTextEvent, false, 0, false );
+        	
+            this.move( _xPos, _yPos );
+            //resetStyle();
+            this.visible = true;
+        }
+        
+        /**
+		 * 
+		 */
+        public function setPosition( x : Number, y : Number ) : void
+        {
+            _xPos = x;
+            _yPos = y;
+        }
+        
+        /**
+		 * 
+		 */		
+        private function handleClosing( event : Event ) : void
+        {
+        	dispatchEvent(new Event(NOTIFICATION_CLOSED));
+        }
+        /**
+		 * 
+		 * Sends an event notice containing the screen name that was clicked in this renderer.
+		 * 
+		 */
+		private function notificationStatusTextAreaTextEvent( event : TextEvent ) : void
+		{
+			var argText : String = event.text;  
+			var action : String = argText.substring( 0, argText.indexOf( ";" ) );
+			var screenName : String = argText.substring( (argText.indexOf( ";" ) + 1), argText.length );
+				
+			if ( action == "lookup" )
+			{
+				new ClearCurrentLookupUserScreenNameEvent( ClearCurrentLookupUserScreenNameEvent.EVENT ).dispatch();
+				var setCurrentLookupUserEvent : SetCurrentLookupUserScreenNameEvent = new SetCurrentLookupUserScreenNameEvent( SetCurrentLookupUserScreenNameEvent.EVENT );
+				setCurrentLookupUserEvent.screenName = screenName;
+				setCurrentLookupUserEvent.dispatch();
+				new SetSelectedViewStateEvent( ApplicationContext.USER_LOOKUP_VIEW ).dispatch();
+				
+				if ( ApplicationContext.currentViewState == ApplicationContext.USER_LOOKUP_VIEW )
+				{
+					// NOTE: this hard reference should be cleaned up.
+					// move the lookup code into a command/event pair and dispatch
+					// an event from here and the lookup method in UserLookupView
+					Application.application.mainView.userLookupView.lookup();
+				}
+				else
+				{
+					new SetSelectedViewStateEvent( ApplicationContext.USER_LOOKUP_VIEW ).dispatch();
+				}
+			}
+			else
+			{
+				navigateToURL( new URLRequest( event.text ) );
+			}
+		}
+		
+		private function parseStatusText( statusText : String ) : String
+		{
+            statusText = statusText.replace( /@[a-zA-Z0-9_]+/ig, userLinkReplace );
+            statusText = statusText.replace( /(http|https|ftp):\/\/[a-zA-Z0-9_\.\/\-_;=\?,&:]+/ig, urlReplace );
+
+            return statusText;
+        }
+
+        private function userLinkReplace() : String
+        {
+            var userLink : String = "<font color='#68896f'><a href=\"event:lookup;" + 
+            						String( arguments[0] ).substr( 1 ) + "\">" + arguments[0] + "</a></font>";
+            trace( "userLink: " + userLink );
+            return userLink;
+        }
+
+        private function urlReplace() : String
+        {
+            return "<a href=\"event:" + arguments[0] + "\">" + arguments[0] + "</a>";
+        }
+        
+    ]]>
+</mx:Script>
+
+<mx:HBox id="main" 
+	width="100%" height="100%"
+    verticalScrollPolicy="off"
+    styleName="notificationWindowBox">
+    
+    <mx:Image source="{_pStatus.user.profile.profileImageURL}" />
+        	 
+	<mx:TextArea id="notificationStatusTextArea" htmlText="{'&lt;b&gt;&lt;font color=\'#879c8a\'&gt;' + 
+												_pStatus.user.name+'&lt;/font&gt;&lt;/b&gt;' +
+									'&lt;font color=\'#24a449\'&gt;' + 
+									' (' + 
+									'&lt;a href=\'event:lookup;'+_pStatus.user.screenName+'\'&gt;' + 
+									_pStatus.user.screenName +
+									'&lt;/a&gt;' +  
+									') ' + 
+									'&lt;/font&gt;' +
+									': ' + 
+									parseStatusText(_pStatus.text)}"  
+				width="100%" height="50"
+				verticalScrollPolicy="off"
+				wordWrap="true"
+				selectable="false"
+				focusThickness="0"
+				styleName="statusesTimelineStatusText">
+	</mx:TextArea>
+</mx:HBox>
+
+<mx:Parallel id="revealEffect" duration="1000">
+    <mx:WipeUp />
+    <mx:Fade />
+</mx:Parallel>
+</mx:Window>

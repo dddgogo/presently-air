@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	styleName="settingsBox">
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.events.SetDirectMessagesNotificationsPrefEvent;
+			import com.intridea.presentlyAIRClient.events.SetMainStreamNotificationsPrefEvent;
+			import com.intridea.presentlyAIRClient.events.SetSystemTrayPreferenceEvent;
+
+			import com.intridea.presentlyAIRClient.events.UpdateTransparencyEvent;
+			import com.intridea.presentlyAIRClient.events.EnableTransparencyEvent;
+			import mx.events.NumericStepperEvent;
+			import com.intridea.presentlyAIRClient.events.UpdateAutoRefreshEvent;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			
+			/**
+			 * 
+			 */
+			private function updateAutoRefresh( event : NumericStepperEvent ) : void
+			{
+				var updateAutoRefreshEvent : UpdateAutoRefreshEvent = new UpdateAutoRefreshEvent( UpdateAutoRefreshEvent.EVENT );
+				updateAutoRefreshEvent.interval = event.value;
+				updateAutoRefreshEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function toggleTransparency( event : MouseEvent ) : void
+			{
+				var enableTransparencyEvent : EnableTransparencyEvent = new EnableTransparencyEvent( EnableTransparencyEvent.EVENT );
+				enableTransparencyEvent.isEnabled = event.currentTarget.selected;
+				enableTransparencyEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function updateTransparency( event : Event ) : void
+			{
+				var updateTransparencyEvent : UpdateTransparencyEvent = new UpdateTransparencyEvent( UpdateTransparencyEvent.EVENT );
+				updateTransparencyEvent.transparency = event.currentTarget.selectedItem;
+				updateTransparencyEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function setSystemTrayPreference( event : MouseEvent ) : void
+			{
+				var setSystemTrayPreferenceEvent : SetSystemTrayPreferenceEvent = new SetSystemTrayPreferenceEvent( SetSystemTrayPreferenceEvent.EVENT );
+				setSystemTrayPreferenceEvent.isMinimizeToSystemTrayEnabled = event.currentTarget.selected;
+				setSystemTrayPreferenceEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function setMainStreamNotificationsPref( event : MouseEvent ) : void
+			{
+				var setMainStreamNotificationsPrefEvent : SetMainStreamNotificationsPrefEvent = new SetMainStreamNotificationsPrefEvent( SetMainStreamNotificationsPrefEvent.EVENT );
+				setMainStreamNotificationsPrefEvent.mainStreamNotificationsEnabled = event.currentTarget.selected;
+				setMainStreamNotificationsPrefEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function setDirectMessagesNotificationsPref( event : MouseEvent ) : void
+			{
+				var setDirectMessagesNotificationsPrefEvent : SetDirectMessagesNotificationsPrefEvent = new SetDirectMessagesNotificationsPrefEvent( SetDirectMessagesNotificationsPrefEvent.EVENT );
+				setDirectMessagesNotificationsPrefEvent.directMessagesNotificationsEnabled = event.currentTarget.selected;
+				setDirectMessagesNotificationsPrefEvent.dispatch();
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:HBox>		
+		<mx:Label text="Auto-update interval (minutes)" styleName="settingsLabel" />
+		<mx:NumericStepper minimum="2" maximum="90" change="updateAutoRefresh(event);" />		
+	</mx:HBox>
+	<mx:HBox>
+		<mx:CheckBox label="Enable transparency" 
+			click="toggleTransparency(event);" 
+			selected="{ViewUtils.isTransparencyEnabled}"
+			styleName="settingsLabel" />
+		<mx:ComboBox dataProvider="[100,95,90,85,80,75,70,65,60,55,50,45]"
+			enabled="{ViewUtils.isTransparencyEnabled}"
+			change="updateTransparency(event);" />
+	</mx:HBox>
+	<mx:CheckBox label="Minimize to system tray" selected="{ModelLocator.instance.isMinimizeToSystemTrayEnabled}" click="setSystemTrayPreference(event);" styleName="settingsLabel" />
+	<mx:Label text="Message notifications" styleName="settingsTitleLabel" />
+	<mx:VBox width="100%" styleName="notificationsBox">
+		<mx:CheckBox label="Main Stream Updates" selected="{ModelLocator.instance.mainStreamNotificationsEnabled}" click="setMainStreamNotificationsPref(event);" styleName="settingsLabel" />
+		<mx:CheckBox label="Direct Messages" selected="{ModelLocator.instance.directMessagesNotificationsEnabled}" click="setDirectMessagesNotificationsPref(event);" styleName="settingsLabel" />	
+	</mx:VBox>
+</mx:VBox>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	width="100%"
+	creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import com.intridea.presentlyAIRClient.vo.Status;
+			import com.intridea.presentlyAIRClient.events.ClearCurrentLookupUserScreenNameEvent;
+			import com.intridea.presentlyAIRClient.context.ApplicationContext;
+			import com.intridea.presentlyAIRClient.events.SetSelectedViewStateEvent;
+			import com.intridea.presentlyAIRClient.events.SetCurrentLookupUserScreenNameEvent;
+			import com.intridea.presentlyAIRClient.events.ShowEvent;
+
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			
+			/**
+			 * 
+			 */
+			private function init() : void
+			{
+				statusTextArea.addEventListener( TextEvent.LINK, statusTextAreaTextEvent, false, 0, false );
+			}
+			
+			/**
+			 * 
+			 */
+			override public function validateNow() : void
+			{
+				var backgroundColor : uint;
+				var textColor : uint;
+				
+				if ( data.isReply )
+				{
+					backgroundColor = 0x595959;
+					textColor = 0xb5b5b5;
+				}
+				else if ( data.isDirectMessage )
+				{
+					backgroundColor = 0x454c47;
+					textColor = 0x90a796;
+				}
+				else
+				{
+					backgroundColor = 0x434343;
+					textColor = 0xb5b5b5;	
+				}
+				
+				statusesTimelineRendererBox.setStyle( "backgroundColor", backgroundColor );
+				statusTextArea.setStyle( "color", textColor );
+			}
+			
+			/**
+			 * 
+			 * Sends an event notice containing the screen name that was clicked in this renderer.
+			 * 
+			 */
+			private function statusTextAreaTextEvent( event : TextEvent ) : void
+			{
+				
+				var argText : String = event.text;  
+				var action : String = argText.substring( 0, argText.indexOf( ";" ) );
+				var screenName : String = argText.substring( (argText.indexOf( ";" ) + 1), argText.length );
+				
+				if ( action == "lookup" )
+				{
+					new ClearCurrentLookupUserScreenNameEvent( ClearCurrentLookupUserScreenNameEvent.EVENT ).dispatch();
+					
+					var setCurrentLookupUserEvent : SetCurrentLookupUserScreenNameEvent = new SetCurrentLookupUserScreenNameEvent( SetCurrentLookupUserScreenNameEvent.EVENT );
+					setCurrentLookupUserEvent.screenName = screenName;
+					setCurrentLookupUserEvent.dispatch();
+					
+					if ( ApplicationContext.currentViewState == ApplicationContext.USER_LOOKUP_VIEW )
+					{
+						// NOTE: this hard reference should be cleaned up.
+						// move the lookup code into a command/event pair and dispatch
+						// an event from here and the lookup method in UserLookupView
+						Application.application.mainView.userLookupView.lookup();
+					}
+					else
+					{
+						new SetSelectedViewStateEvent( ApplicationContext.USER_LOOKUP_VIEW ).dispatch();
+					}
+				}
+				else
+				{
+					navigateToURL( new URLRequest( event.text ) );
+				}
+				
+			}
+			
+			private function parseStatusText( statusText : String ) : String
+			{
+	            statusText = statusText.replace( /@[a-zA-Z0-9_]+/ig, userLinkReplace );
+	            statusText = statusText.replace( /(http|https|ftp):\/\/[a-zA-Z0-9_\.\/\-_;=\?,&:]+/ig, urlReplace );
+	
+	            return statusText;
+	        }
+	
+	        private function userLinkReplace() : String
+	        {
+	            var userLink : String = "<font color='#68896f'><a href=\"event:lookup;" + 
+	            						String( arguments[0] ).substr( 1 ) + "\">" + arguments[0] + "</a></font>";
+	            trace( "userLink: " + userLink );
+	            return userLink;
+	        }
+	
+	        private function urlReplace() : String
+	        {
+	            return "<a href=\"event:" + arguments[0] + "\">" + arguments[0] + "</a>";
+	        }
+
+		]]>
+	</mx:Script>
+	<mx:HBox id="statusesTimelineRendererBox" width="100%" styleName="statusesTimelineRendererBox">
+		<mx:Image source="{data.user.profile.profileImageURL}" width="{ViewUtils.userProfileImageWidth}" height="{ViewUtils.userProfileImageHeight}"/>
+		<mx:VBox width="100%">
+			<mx:TextArea id="statusTextArea" htmlText="{'&lt;b&gt;&lt;font color=\'#879c8a\'&gt;' + 
+									data.user.name+'&lt;/font&gt;&lt;/b&gt;' +
+									'&lt;font color=\'#24a449\'&gt;' + 
+									' (' + 
+									'&lt;a href=\'event:lookup;'+data.user.screenName+'\'&gt;' + 
+									data.user.screenName +
+									'&lt;/a&gt;' +  
+									') ' + 
+									'&lt;/font&gt;' +
+									': ' + 
+									parseStatusText(data.text)}"  
+				width="100%" height="50"
+				verticalScrollPolicy="off"
+				wordWrap="true"
+				selectable="false"
+				focusThickness="0"
+				styleName="statusesTimelineStatusText">
+			</mx:TextArea>
+			<mx:Label text="{data.getCreatedAtString()}" styleName="statusCreatedAtLabel" />
+		</mx:VBox>
+	</mx:HBox>
+</mx:VBox>

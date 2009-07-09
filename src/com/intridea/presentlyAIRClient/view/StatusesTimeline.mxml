@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.events.FriendsTimelineEvent;
+			import com.intridea.presentlyAIRClient.events.StatusesUpdatedEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			import com.intridea.presentlyAIRClient.events.PublicTimelineEvent;
+
+			/**
+			 * 
+			 */
+			private static const dispatcher : CairngormEventDispatcher = CairngormEventDispatcher.getInstance();
+			
+			[Bindable]
+			/**
+			 * 
+			 */
+			private var statuses : Array;
+			
+			/**
+			 * 
+			 */
+			private function init() : void
+			{
+				// initial request to get the statuses for the "Main Stream"/Friends Timeline
+				new FriendsTimelineEvent( FriendsTimelineEvent.EVENT ).dispatch();
+				dispatcher.addEventListener( StatusesUpdatedEvent.EVENT, onStatusesUpdated, false, 0, false );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onStatusesUpdated( event : StatusesUpdatedEvent ) : void
+			{
+				// update the List
+				statuses = ModelLocator.instance.statusesManager.getStatuses();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:List id="statusesTimelineTileList" width="100%" height="100%" 
+		dataProvider="{statuses}" 
+		columnCount="1"
+		itemRenderer="com.intridea.presentlyAIRClient.view.StatusesTimelineRenderer"
+		styleName="statusesTimelineTileList" />
+	
+</mx:VBox>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<cairngorm:ServiceLocator xmlns:mx="http://www.adobe.com/2006/mxml" 
+	                      xmlns:cairngorm="com.adobe.cairngorm.business.*" 
+	                      xmlns:business="com.intridea.presentlyAIRClient.business.*">
+	                      
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+
+			import mx.controls.Alert;			
+			import mx.rpc.soap.LoadEvent;
+		    
+		    /**
+		     * 
+		     */
+		    public static const LOGIN : String = "login";
+		    
+		    /**
+		     * 
+		     */
+		    public static const LOGOUT : String = "logoutUser";
+		    
+		    /**
+		     * 
+		     */
+		    public static const PUBLIC_TIMELINE : String = "publicTimeline";
+		    
+		    /**
+		     * 
+		     */
+		    public static const USER_TIMELINE : String = "userTimeline";
+		    
+		    /**
+		     * 
+		     */
+		    public static const FRIENDS_TIMELINE : String = "friendsTimeline";
+		    
+		    /**
+		     * 
+		     */
+		    public static const SEND_UPDATE : String = "sendUpdate";
+		    
+		    /**
+		     * 
+		     */
+		    public static const REPLIES : String = "replies";
+		    
+		    /**
+		     * 
+		     */
+		    public static const DIRECT_MESSAGES : String = "directMessages";
+		    
+		    /**
+		     * 
+		     */
+		    public static const FRIENDS : String = "friends";
+		    
+		    /**
+		     * 
+		     */
+		    public static const FOLLOWERS : String = "followers";
+		    
+		    /**
+		     * 
+		     */
+		    public static const SHOW : String = "show";
+			
+		]]>
+	</mx:Script>
+	
+	<business:AbstractHTTPService id="login"/>
+		
+	<business:AbstractHTTPService id="logoutUser" />
+	
+	<business:AbstractHTTPService id="publicTimeline" />
+		
+	<business:AbstractHTTPService id="userTimeline" />
+	
+	<business:AbstractHTTPService id="friendsTimeline" />
+	
+	<business:AbstractHTTPService id="sendUpdate" />
+		
+	<business:AbstractHTTPService id="replies" />
+	
+	<business:AbstractHTTPService id="directMessages" />
+			  
+	<business:AbstractHTTPService id="friends" />
+			  
+	<business:AbstractHTTPService id="followers" />
+			  
+	<business:AbstractHTTPService id="show" />
+		           
+</cairngorm:ServiceLocator>

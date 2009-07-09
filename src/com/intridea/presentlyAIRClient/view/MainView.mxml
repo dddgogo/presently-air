@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:view="com.intridea.presentlyAIRClient.view.*" 
+	xmlns:paint="com.degrafa.paint.*"
+	xmlns:geometry="com.degrafa.geometry.*"
+	xmlns:degrafa="http://www.degrafa.com/2007"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	verticalGap="0"
+	alpha="{ViewUtils.transparency}"
+	creationComplete="init();"
+	addedToStage="onAddedToStage();">
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.utils.Notifier;
+			import com.intridea.presentlyAIRClient.events.DatabaseCreatedEvent;
+			import com.intridea.presentlyAIRClient.events.CreateUserSettingsDatabaseEvent;
+			import com.intridea.presentlyAIRClient.events.CheckDatabaseForUserSettingsEvent;
+			import com.intridea.presentlyAIRClient.events.ExitApplicationEvent;
+			import com.intridea.presentlyAIRClient.events.UserLookupStatusesUpdatedEvent;
+			import com.intridea.presentlyAIRClient.events.InitializeSystemTrayEvent;
+			import com.intridea.presentlyAIRClient.events.RefreshTimelineEvent;
+			import com.intridea.presentlyAIRClient.events.InitializeAutoUpdateIntervalEvent;
+			import com.intridea.presentlyAIRClient.events.ClearCurrentLookupUserScreenNameEvent;
+			import com.intridea.presentlyAIRClient.events.ShowEvent;
+			import com.intridea.presentlyAIRClient.events.UserRetrievedEvent;
+			import com.intridea.presentlyAIRClient.context.ApplicationContext;			
+			import com.intridea.presentlyAIRClient.events.DirectMessagesEvent;
+			import com.intridea.presentlyAIRClient.events.RepliesEvent;
+			import com.intridea.presentlyAIRClient.events.FriendsTimelineEvent;
+			import com.intridea.presentlyAIRClient.events.StatusesUpdatedEvent;
+			import com.intridea.presentlyAIRClient.events.TextUpdateSentEvent;
+			import com.intridea.presentlyAIRClient.events.PublicTimelineEvent;
+			import com.intridea.presentlyAIRClient.events.StatusAddedEvent;
+			import com.intridea.presentlyAIRClient.events.SendTextUpdateEvent;
+			import com.intridea.presentlyAIRClient.events.SetSelectedViewStateEvent;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			import com.intridea.presentlyAIRClient.utils.KeyboardUtils;
+			
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			
+			import mx.effects.easing.Quadratic;
+			import mx.core.Application;
+			
+			/**
+			 * 
+			 */
+			private static const dispatcher : CairngormEventDispatcher = CairngormEventDispatcher.getInstance();
+			
+			[Bindable]
+			/**
+			 * 
+			 */
+			private var model : ModelLocator = ModelLocator.instance;
+			
+			[Bindable]
+			/**
+			 * 
+			 */
+			private var textUpdate : String;
+			
+			/**
+			 * 
+			 */
+			private var toolbarButtonsArray : Array;
+			
+			/**
+			 * 
+			 */
+			private var activeButton : Button;
+			
+			/**
+			 * 
+			 */
+			private var _notifier : Notifier;
+			
+			/**
+			 * 
+			 */			
+			private function init() : void
+			{
+				
+				initNotifier();				
+				initToolbarButtonsArray();
+				activeButton = mainStreamButton;
+				
+				addEventListener( KeyboardEvent.KEY_DOWN, onKeyDown );
+				dispatcher.addEventListener( TextUpdateSentEvent.EVENT, onTextUpdateSent, false, 0, false );				
+				dispatcher.addEventListener( StatusesUpdatedEvent.EVENT, onStatusesUpdated, false, 0, false );
+				dispatcher.addEventListener( StatusAddedEvent.EVENT, onStatusAdded, false, 0, false );
+				
+				dispatcher.addEventListener( DatabaseCreatedEvent.EVENT, onDatabaseCreated, false, 0, false );				
+				new CreateUserSettingsDatabaseEvent( CreateUserSettingsDatabaseEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function initNotifier() : void
+			{
+				_notifier = new Notifier();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onAddedToStage() : void
+			{
+				new InitializeSystemTrayEvent( InitializeSystemTrayEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onDatabaseCreated( event : DatabaseCreatedEvent ) : void
+			{
+				new CheckDatabaseForUserSettingsEvent( CheckDatabaseForUserSettingsEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onStatusAdded( event : StatusAddedEvent ) : void
+			{
+				if ( model.mainStreamNotificationsEnabled || 
+					 model.directMessagesNotificationsEnabled && event.status.isDirectMessage )
+				{
+					_notifier.queueNotification( event.status );
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function onStatusesUpdated( event : StatusesUpdatedEvent ) : void
+			{
+				new SetSelectedViewStateEvent( ApplicationContext.STATUSES_TIMELINE_VIEW ).dispatch();
+				_notifier.displayStackedNotifications();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onTextUpdateSent( event : TextUpdateSentEvent ) : void
+			{
+				// clear last message entered by user
+				textUpdateTextInput.text = "";
+				disableActiveToolbarButton( activeButton );
+				new RefreshTimelineEvent( RefreshTimelineEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onKeyDown( event : KeyboardEvent ) : void
+			{	
+				// is the Control Key pressed?
+	            if ( event.controlKey )
+	            {
+	            	// Exit the application when the Control + Q key combination is executed.
+	                if ( event.keyCode == Keyboard.Q )
+	                {
+						new ExitApplicationEvent( ExitApplicationEvent.EVENT ).dispatch();
+	                }
+				}
+				else if ( KeyboardUtils.isEnterEvent( event ) )
+				{
+					if ( sendButton.enabled )
+					{
+						sendTextUpdate();
+					}
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function sendTextUpdate() : void
+			{
+				toggleToolbarButtonState( false );
+				
+				sendButton.enabled = false;
+				var sendTextUdpateEvent : SendTextUpdateEvent = new SendTextUpdateEvent( SendTextUpdateEvent.EVENT );
+				sendTextUdpateEvent.textUpdate = textUpdate;
+				sendTextUdpateEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function refresh() : void
+			{
+				var event : RefreshTimelineEvent = new RefreshTimelineEvent( RefreshTimelineEvent.EVENT );
+				event.currentService = model.currentService;
+				event.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function initToolbarButtonsArray() : void
+			{
+				toolbarButtonsArray = new Array();
+				toolbarButtonsArray.push( mainStreamButton );
+				toolbarButtonsArray.push( publicTimelineButton );
+				toolbarButtonsArray.push( repliesButton );
+				toolbarButtonsArray.push( directMessagesButton );
+				toolbarButtonsArray.push( friendsFollowersButton );
+				toolbarButtonsArray.push( lookupButton );
+			}
+			
+			/**
+			 * 
+			 */
+			private function toggleToolbarButtonState( state : Boolean ) : void
+			{
+				var buttonCount : int = toolbarButtonsArray.length
+				for ( var i : int = 0; i < buttonCount; i++ )
+				{
+					toolbarButtonsArray[i].enabled = state;
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			public function disableActiveToolbarButton( button : Button ) : void
+			{
+				var buttonCount : int = toolbarButtonsArray.length
+				for ( var i : int = 0; i < buttonCount; i++ )
+				{
+					var currentButton : Button = toolbarButtonsArray[i];
+					if ( currentButton.id == button.id )
+					{
+						currentButton.enabled = false;
+						activeButton = currentButton;
+					}
+					else
+					{
+						currentButton.enabled = true;
+					}
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function updateToolbarForFriendsTimeline() : void
+			{
+				disableActiveToolbarButton( mainStreamButton );
+			}
+			
+			/**
+			 * 
+			 */
+			private function updateToolbarForPublicTimeline() : void
+			{
+				disableActiveToolbarButton( publicTimelineButton );
+			}
+			
+			/**
+			 * 
+			 */
+			private function updateToolbarForRepliesTimeline() : void
+			{
+				disableActiveToolbarButton( repliesButton );
+			}
+			
+			/**
+			 * 
+			 */
+			private function updateToolbarForDirectMessagesTimeline() : void
+			{
+				disableActiveToolbarButton( directMessagesButton );
+			}
+			
+			/**
+			 * 
+			 */
+			private function getFriendsAndFollowers() : void
+			{
+				disableActiveToolbarButton( friendsFollowersButton );
+				new SetSelectedViewStateEvent( ApplicationContext.FRIENDS_FOLLOWERS_VIEW ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function lookup() : void
+			{
+				disableActiveToolbarButton( lookupButton );
+				new ClearCurrentLookupUserScreenNameEvent( ClearCurrentLookupUserScreenNameEvent.EVENT ).dispatch();
+				new SetSelectedViewStateEvent( ApplicationContext.USER_LOOKUP_VIEW ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function settings() : void
+			{
+				disableActiveToolbarButton( settingsButton );
+				new SetSelectedViewStateEvent( ApplicationContext.SETTINGS_VIEW ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function textUpdateTextChange() : void
+			{
+				var isSendButtonEnabled : Boolean = true;
+				
+				var color : String;
+				var backgroundColor : String;
+				
+				if ( textUpdateTextInput.text.length >= 1 && textUpdateTextInput.text.length <= 140 )
+				{
+					color = "#9bf175";
+				 	backgroundColor = "#ffffff";
+					
+					textUpdate = textUpdateTextInput.text;	
+				}
+				else
+				{
+					color = "#8d8d8d";
+					backgroundColor = "#000000";
+					
+					isSendButtonEnabled = false;
+				}
+				
+				textUpdateTextInput.setStyle( "color", color );
+				textUpdateTextInput.setStyle( "backgroundColor", backgroundColor );
+				
+				sendButton.enabled = isSendButtonEnabled;
+			}
+			
+			/**
+			 * 
+			 */
+			private function textAreaTextInput( event : TextEvent ) : void
+			{
+            	if ( event.text == "\n" )
+            	{
+					event.preventDefault();
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function disableUpdateUI() : void
+			{
+				textUpdateTextInput.enabled = false;
+				sendButton.enabled = false;
+				refreshButton.enabled = false;
+				settingsButton.enabled = false;
+			}
+			
+			/**
+			 * 
+			 */
+			private function enableUpdateUI() : void
+			{
+				textUpdateTextInput.enabled = true;
+				if ( textUpdateTextInput.text.length >=1 )
+				{
+					sendButton.enabled = true;	
+				}
+				refreshButton.enabled = true;
+				settingsButton.enabled = true;
+			}
+			
+			/**
+			 * 
+			 */
+			private function mainStreamButtonClick() : void
+			{
+				updateToolbarForFriendsTimeline();
+				var event : RefreshTimelineEvent = new RefreshTimelineEvent( RefreshTimelineEvent.EVENT );
+				event.currentService = "friendsTimeline";
+				event.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function publicTimelineButtonClick() : void
+			{
+				updateToolbarForPublicTimeline();
+				var event : RefreshTimelineEvent = new RefreshTimelineEvent( RefreshTimelineEvent.EVENT );
+				event.currentService = "publicTimeline";
+				event.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function repliesButtonClick() : void
+			{
+				updateToolbarForRepliesTimeline();
+				var event : RefreshTimelineEvent = new RefreshTimelineEvent( RefreshTimelineEvent.EVENT );
+				event.currentService = "repliesTimeline";
+				event.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function directMessagesButtonClick() : void
+			{
+				updateToolbarForDirectMessagesTimeline();
+				var event : RefreshTimelineEvent = new RefreshTimelineEvent( RefreshTimelineEvent.EVENT );
+				event.currentService = "directMessagesTimeline";
+				event.dispatch();
+			}
+
+    	]]>
+    </mx:Script>
+
+	<!-- Begin background shape //-->
+	<degrafa:Surface>
+		<degrafa:fills>
+			<paint:LinearGradientFill id="appBackgroundFill" angle="90">
+				<!-- Begin top color -->                    
+                <paint:GradientStop color="#171717"/>
+				<!-- /End top color -->                        
+				<!-- Begin bottom color -->
+				<paint:GradientStop color="#111111"/>
+				<!-- /End bottom color -->
+            </paint:LinearGradientFill>
+		</degrafa:fills>
+		<degrafa:GeometryGroup >
+			<geometry:RoundedRectangle fill="{appBackgroundFill}"
+				width="{this.width}" height="{this.height}"
+				cornerRadius="10"/>
+		</degrafa:GeometryGroup> 
+	</degrafa:Surface>
+	<!-- /End background shape //-->
+	
+	<!-- Begin Application title bar //-->
+	<!-- Contains the logo and Minimize and Exit buttons //-->
+	<view:TitleBar width="100%" 
+		mouseDown="{ Application.application.nativeWindow.startMove(); }"/>
+	<!-- /End Application title bar //-->
+	
+	<!-- Begin ToolBarBox //-->
+	<mx:HBox width="100%"
+		visible="{model.isAuthenticated}"
+		includeInLayout="{model.isAuthenticated}" 
+		showEffect="Fade"
+		styleName="toolBarBox">
+		<mx:Button id="mainStreamButton" click="mainStreamButtonClick();" enabled="false" toolTip="Main Stream" styleName="mainStreamButton" />
+		<mx:Button id="publicTimelineButton" click="publicTimelineButtonClick();" toolTip="Public Timeline" styleName="publicTimelineButton" />		
+		<mx:Button id="repliesButton" click="repliesButtonClick();" toolTip="Replies" styleName="repliesButton" />		
+		<mx:Button id="directMessagesButton" click="directMessagesButtonClick();" toolTip="Direct Messages" styleName="directMessagesButton" />		
+		<mx:Button id="friendsFollowersButton" click="getFriendsAndFollowers();" toolTip="Following/Followers" styleName="followingFollowersButton" />
+		<mx:Button id="lookupButton" click="lookup();" toolTip="Lookup" styleName="lookupButton" />
+		<mx:Spacer width="100%"/>
+		<mx:Button id="refreshButton" click="refresh();" toolTip="Refresh" styleName="refreshButton" />
+		<mx:Button id="settingsButton" click="settings();" toolTip="Settings" styleName="settingsButton" />
+	</mx:HBox>
+	<!-- End ToolBarBox //-->
+	
+	<mx:ViewStack id="mainViewStack" selectedIndex="{ ApplicationContext.currentViewState }" 
+		width="100%" height="100%"
+		styleName="mainViewStack">
+		<view:Login id="login" width="100%" height="100%" />
+		<view:StatusesTimeline id="statusesTimeline" 
+			showEffect="Fade" 
+			width="100%" height="100%" 
+			show="textUpdateTextInput.setFocus();" />
+		<view:FriendsFollowers id="friendsFollowersView" 
+			width="100%" height="100%" 
+			hide="enableUpdateUI();" 
+			show="disableUpdateUI();"
+			showEffect="Fade" />
+		<view:UserLookupView id="userLookupView" 
+			width="100%" height="100%" 
+			hide="enableUpdateUI();"
+			show="disableUpdateUI();" 
+			showEffect="Fade" />
+		<view:Settings width="100%" height="100%"
+			showEffect="Fade" />
+	</mx:ViewStack>
+	
+	<!-- Begin udpate text input controls //-->
+	<mx:VBox width="100%" horizontalAlign="center" 
+		visible="{model.isAuthenticated}" 
+		styleName="sendTextUpdateControlsBox">
+		<mx:TextArea id="textUpdateTextInput" 
+			width="100%" height="80" 
+			styleName="textUpdateTextInput" 
+			wordWrap="true"
+			showEffect="Fade"
+			textInput="textAreaTextInput(event);"
+			change="textUpdateTextChange();"/>
+		<mx:HBox width="100%" horizontalAlign="right">
+			<mx:Label text="{((textUpdateTextInput.text.length-140)*-1)}" 
+				showEffect="Fade"
+				styleName="textUpdateCharsLeft" />
+			<mx:Button id="sendButton" 
+				enabled="false" 
+				label="Send" 
+				showEffect="Fade"
+				styleName="mainButton" 
+				click="sendTextUpdate();" />
+		</mx:HBox>
+	</mx:VBox>
+	<!-- /End udpate text input controls //-->
+	
+	<!-- Begin custom status bar //-->
+	<!-- Contains status text field and application resize control //-->
+	<view:StatusBar width="100%" height="18"/>
+	<!-- /End custom status bar //-->
+	
+</mx:VBox>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.events.FollowersRetrievedEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.intridea.presentlyAIRClient.events.FriendsRetrievedEvent;
+			import com.intridea.presentlyAIRClient.events.FollowersEvent;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			import com.intridea.presentlyAIRClient.events.FriendsEvent;
+			
+			/**
+			 * 
+			 */
+			private static const dispatcher : CairngormEventDispatcher = CairngormEventDispatcher.getInstance();
+			
+			[Bindable]
+			/**
+			 * 
+			 */
+			private var friendsFollowersArray : Array = new Array();
+			
+			private function init() : void
+			{
+				dispatcher.addEventListener( FriendsRetrievedEvent.EVENT, onFriendsRetrieved, false, 0, false );
+				dispatcher.addEventListener( FollowersRetrievedEvent.EVENT, onFollowersRetrieved, false, 0, false );
+				getFriends();
+			}
+			
+			/**
+			 * 
+			 */
+			private function getFriends() : void
+			{
+				friendsButton.enabled = false;
+				followersButton.enabled = true;
+				new FriendsEvent( FriendsEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onFriendsRetrieved( event : FriendsRetrievedEvent ) : void
+			{
+				friendsFollowersArray = ModelLocator.instance.friends;
+			}
+			
+			/**
+			 * 
+			 */
+			private function getFollowers() : void
+			{
+				friendsButton.enabled = true;
+				followersButton.enabled = false;
+				new FollowersEvent( FollowersEvent.EVENT ).dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onFollowersRetrieved( event : FollowersRetrievedEvent ) : void
+			{
+				friendsFollowersArray = ModelLocator.instance.followers;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Spacer height="5"/>
+	<mx:HBox>
+		<mx:Spacer width="5"/>
+		<mx:Button id="friendsButton" label="Friends" enabled="false" click="getFriends()" styleName="mainButton" />
+		<mx:Button id="followersButton" label="Followers" click="getFollowers()" styleName="mainButton" />
+	</mx:HBox>
+	
+	<mx:TileList id="friendsFollowersTileList" width="100%" height="100%" 
+		dataProvider="{friendsFollowersArray}" 
+		columnCount="1"
+		itemRenderer="com.intridea.presentlyAIRClient.view.UserProfileRenderer"
+		styleName="friendsFollowersTileList" />
+		
+</mx:VBox>

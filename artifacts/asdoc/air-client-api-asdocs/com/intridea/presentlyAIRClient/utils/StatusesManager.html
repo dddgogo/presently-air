@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="../../../../style.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../../../../print.css" type="text/css" media="print">
+<meta content="StatusesManager,com.intridea.presentlyAIRClient.utils.StatusesManager,addStatus,addStatuses,getStatus,getStatuses,serialize" name="keywords">
+<title>com.intridea.presentlyAIRClient.utils.StatusesManager</title>
+</head>
+<body>
+<script type="text/javascript" language="javascript" src="../../../../asdoc.js"></script><script type="text/javascript" language="javascript" src="../../../../cookies.js"></script><script type="text/javascript" language="javascript">
+<!--
+				asdocTitle = 'StatusesManager - API Documentation';
+				var baseRef = '../../../../';
+				window.onload = configPage;
+			--></script>
+<table style="display:none" id="titleTable" cellspacing="0" cellpadding="0" class="titleTable">
+<tr>
+<td align="left" class="titleTableTitle">API Documentation</td><td align="right" class="titleTableTopNav"><a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../package-summary.html">All&nbsp;Packages</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../class-summary.html">All&nbsp;Classes</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../index-list.html')" href="../../../../all-index-A.html">Index</a>&nbsp;|&nbsp;<a href="../../../../index.html?com/intridea/presentlyAIRClient/utils/StatusesManager.html&amp;com/intridea/presentlyAIRClient/utils/class-list.html" id="framesLink1">Frames</a><a onclick="parent.location=document.location" href="" style="display:none" id="noFramesLink1">No&nbsp;Frames</a></td><td rowspan="3" align="right" class="titleTableLogo"><img alt="Adobe Logo" title="Adobe Logo" class="logoImage" src="../../../../images/logo.jpg"></td>
+</tr>
+<tr class="titleTableRow2">
+<td align="left" id="subTitle" class="titleTableSubTitle">Class&nbsp;StatusesManager</td><td align="right" id="subNav" class="titleTableSubNav"><a href="#methodSummary">Methods</a></td>
+</tr>
+<tr class="titleTableRow3">
+<td colspan="2">&nbsp;</td>
+</tr>
+</table>
+<script type="text/javascript" language="javascript">
+<!--
+if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Class StatusesManager"); titleBar_setSubNav(false,false,false,false,false,false,true,false,false,false,false,false,false,false);}
+--></script>
+<div class="MainContent">
+<table cellspacing="0" cellpadding="0" class="classHeaderTable">
+<tr>
+<td class="classHeaderTableLabel">Package</td><td><a onclick="javascript:loadClassListFrame('class-list.html')" href="package-detail.html">com.intridea.presentlyAIRClient.utils</a></td>
+</tr>
+<tr>
+<td class="classHeaderTableLabel">Class</td><td class="classSignature">public final  class StatusesManager</td>
+</tr>
+</table>
+<p></p>
+  
+  Provides serialization methods for <code>Status</code> objects. Facilitates the updates
+  of new <code>Status</code> objects. Intended to house all other <code>User</code> related 
+  tasks and functionality.
+  
+  <p></p>
+<br>
+<hr>
+</div>
+<a name="methodSummary"></a>
+<div class="summarySection">
+<div class="summaryTableTitle">Public Methods</div>
+<table id="summaryTableMethod" class="summaryTable " cellpadding="3" cellspacing="0">
+<tr>
+<th>&nbsp;</th><th colspan="2">Method</th><th class="summaryTableOwnerCol">Defined&nbsp;by</th>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#StatusesManager()">StatusesManager</a>()</div>
+<div class="summaryTableDescription">
+   
+   Provides serialization methods for <code>Status</code> objects.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#addStatus()">addStatus</a>(status:<a href="../vo/Status.html">Status</a>):void</div>
+<div class="summaryTableDescription">
+   
+   Update the client side statuses memory store.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#addStatuses()">addStatuses</a>(statuses:Array):void</div>
+<div class="summaryTableDescription">
+   
+   Updates the collection of client side <code>Status</code> objects.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#getStatus()">getStatus</a>(statusArg:<a href="../vo/Status.html">Status</a>):<a href="../vo/Status.html">Status</a>
+</div>
+<div class="summaryTableDescription">
+   
+   Interrogate the collection of client side <code>Status</code> objects.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#getStatuses()">getStatuses</a>():Array</div>
+<div class="summaryTableDescription">
+   
+   Hand back the collection of client side <code>Status</code> objects.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#serialize()">serialize</a>(rawStatus:Object):<a href="../vo/Status.html">Status</a>
+</div>
+<div class="summaryTableDescription">
+   
+   Converts an XML representation of a Present.ly status to a binary ActionScript object available for
+   use in the Present.ly AIR Client.</div>
+</td><td class="summaryTableOwnerCol">StatusesManager</td>
+</tr>
+</table>
+</div>
+<script type="text/javascript" language="javascript">
+<!--
+showHideInherited();
+--></script>
+<div class="MainContent">
+<a name="constructorDetail"></a>
+<div class="detailSectionHeader">Constructor detail</div>
+<a name="StatusesManager()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">StatusesManager</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">constructor</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function StatusesManager()</code><p>
+   
+   Provides serialization methods for <code>Status</code> objects. Facilitates the updates
+   of new <code>Status</code> objects. Intended to house all other <code>Status</code> related 
+   tasks and functionality.
+   
+   </p><p>
+<span class="label">See also</span>
+</p>
+<div class="seeAlso">
+<a href="../vo/Status.html" target="">com.intridea.presentlyAIRClient.vo.Status</a>
+</div>
+</div>
+<a name="methodDetail"></a>
+<div class="detailSectionHeader">Method detail</div>
+<a name="addStatus()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">addStatus</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function addStatus(status:<a href="../vo/Status.html">Status</a>):void</code><p>
+   
+   Update the client side statuses memory store. Notify the view that the statuses have been udpated.
+   
+   </p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">status</span>:<a href="../vo/Status.html">Status</a></code> &mdash; A binary representation of a Present.ly <code>Status</code> object.
+   </td>
+</tr>
+</table>
+<p>
+<span class="label">See also</span>
+</p>
+<div class="seeAlso">
+<a href="../vo/Status.html" target="">com.intridea.presentlyAIRClient.vo.Status</a>
+</div>
+</div>
+<a name="addStatuses()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">addStatuses</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function addStatuses(statuses:Array):void</code><p>
+   
+   Updates the collection of client side <code>Status</code> objects. Notifies the view that the client
+   side statuses collection has been updated.
+   
+   </p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">statuses</span>:Array</code> &mdash; A collection of <code>Status</code> objects that will be added to the client side <code>Status</code> object collection.  
+   
+   </td>
+</tr>
+</table>
+</div>
+<a name="getStatus()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">getStatus</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function getStatus(statusArg:<a href="../vo/Status.html">Status</a>):<a href="../vo/Status.html">Status</a></code><p>
+   
+   Interrogate the collection of client side <code>Status</code> objects. Compare the text message of 
+   each one and return matching the instances.
+   
+   </p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">statusArg</span>:<a href="../vo/Status.html">Status</a></code> &mdash; The specific <code>Status</code> that is being located.
+   
+   </td>
+</tr>
+</table>
+<p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20"></td><td><code><a href="../vo/Status.html">Status</a></code></td>
+</tr>
+</table>
+</div>
+<a name="getStatuses()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">getStatuses</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function getStatuses():Array</code><p>
+   
+   Hand back the collection of client side <code>Status</code> objects.
+   
+   </p><p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20"></td><td><code>Array</code> &mdash; _statuses The collection of client side <code>Status</code> objects.
+   
+   </td>
+</tr>
+</table>
+</div>
+<a name="serialize()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">serialize</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function serialize(rawStatus:Object):<a href="../vo/Status.html">Status</a></code><p>
+   
+   Converts an XML representation of a Present.ly status to a binary ActionScript object available for
+   use in the Present.ly AIR Client.
+   
+   </p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">rawStatus</span>:Object</code> &mdash; The XML status representation returned by the Present.ly server.
+   </td>
+</tr>
+</table>
+<p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20"></td><td><code><a href="../vo/Status.html">Status</a></code> &mdash; 
+                        user The binary ActionScript <code>Status</code> object.
+   com.intridea.presentlyAIRClient.vo.Status
+   
+   
+                        
+                     </td>
+</tr>
+</table>
+</div>
+<br>
+<br>
+<hr>
+<br>
+<p></p>
+<center class="copyright">Copyright (c) 2009  www.intridea.com  All rights reserved.</center>
+</div>
+</body>
+</html>
+<!--Copyright (c) 2009  www.intridea.com  All rights reserved.-->

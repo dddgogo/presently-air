@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
+	            xmlns            = "*"
+				xmlns:flexunit   = "flexunit.flexui.*"
+				xmlns:business="com.intridea.presentlyAIRClient.business.*"
+				creationComplete = "init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.ClearCurrentLookupUserScreenNameCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.EnableTransparencyCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.PresentlyURLChangeCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetCurrentLookupUserScreenNameCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetDirectMessagesNotificationsPrefCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetMainStreamNotificationsPrefCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetRememberLoginInfoPreferenceCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetSelectedViewStateCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.SetSystemTrayPreferenceCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.UpdateAutoRefreshCommandTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.UpdateTransparencyCommandTest;
+
+			import com.intridea.tests.intridea.presentlyAIRClient.events.UserRetrievedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.UserLookupStatusesUpdatedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.UpdateTransparencyEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.UpdateAutoRefreshEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetSystemTrayPreferenceEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetRememberLoginInfoPreferenceEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetMainStreamNotificationsPrefEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetDirectMessagesNotificationsPrefEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetCurrentLookupUserScreenNameEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.RefreshTimelineEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.PresentlyURLChangeEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.PersistUserSettingsToLocalDatabaseEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.LocalSettingsPersistedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.InitializeSystemTrayEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.InitializeAutoUpdateIntervalEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.ExitApplicationEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.EnableTransparencyEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.DatabaseCreatedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.CreateUserSettingsDatabaseEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.ClearCurrentLookupUserScreenNameEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.CheckDatabaseForUserSettingsEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FollowersRetrievedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FriendsRetrievedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.utils.UserManagerTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.context.ApplicationContextTest;
+			
+			// NOTE: the LoginCommandTest test case import HAS to appear BEFORE the LogoutDelegateTest test case
+			import com.intridea.tests.intridea.presentlyAIRClient.commands.LoginCommandTest;
+			
+			import com.intridea.tests.intridea.presentlyAIRClient.business.ServiceUtilsTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.business.ServiceConfigurationsTest;			
+			import com.intridea.tests.intridea.presentlyAIRClient.events.AuthenticationEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.TextUpdateSentEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.StatusesUpdatedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.StatusAddedEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SetSelectedViewStateEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FailedLoginEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FriendsEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.UserTimelineEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FollowersEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.ShowEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.SendTextUpdateEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.PublicTimelineEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.RepliesEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.DirectMessagesEventTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.events.FriendsTimelineEventTest;
+			
+			import com.intridea.tests.intridea.presentlyAIRClient.mocks.MockStatusesTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.mocks.MockStatusTest;
+			
+			import com.intridea.tests.intridea.presentlyAIRClient.model.ModelLocatorTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.model.StatusesManagerTest;
+			
+			import com.intridea.tests.intridea.presentlyAIRClient.utils.ApplicationManagerTest;
+			import com.intridea.tests.intridea.presentlyAIRClient.utils.KeyboardUtilsTest;
+			
+			import com.intridea.tests.intridea.presentlyAIRClient.view.ViewUtilsTest;
+		
+			import flexunit.framework.TestSuite;
+			
+			/**
+			 * 
+			 * Handles the applications creationComplete event, creates the test suite
+			 * and initiates the test harness.
+			 * 
+			 */
+			private function init() : void
+			{
+				testRunner.test = createSuite();
+				testRunner.startTest();	
+			}
+			
+			/**
+			 * 
+			 * Creates the test suite and adds the test cases to the test suite so they are executed one by one.
+			 * 
+			 */
+			private function createSuite():TestSuite
+			{
+				var ts : TestSuite = new TestSuite();
+				
+				// test the application context, contains view state information
+				ts.addTestSuite( ApplicationContextTest );
+				
+				// test the application model
+				ts.addTestSuite( ModelLocatorTest );
+				
+				// test application service configurations
+				ts.addTestSuite( ServiceConfigurationsTest );
+				
+				// test application service configurations
+				ts.addTestSuite( ServiceUtilsTest );
+				
+				// test the app manager
+				ts.addTestSuite( ApplicationManagerTest );
+				
+				// test the user manager
+				ts.addTestSuite( UserManagerTest );
+				
+				// test the keyboard utils
+				ts.addTestSuite( KeyboardUtilsTest );
+				
+				// test the mock status helper class to ensure it's functioning as expected
+				// prior to running the StatusesManagerTest test case
+				ts.addTestSuite( MockStatusTest );
+				
+				// test the mock statuses helper class to ensure it's functioning as expected
+				// prior to running the StatusesManagerTest test case
+				ts.addTestSuite( MockStatusesTest );
+				
+				// test status manager
+				ts.addTestSuite( StatusesManagerTest );
+				
+				// test the view utility class
+				ts.addTestSuite( ViewUtilsTest );
+				
+				// test events
+				ts.addTestSuite( AuthenticationEventTest );
+				ts.addTestSuite( CheckDatabaseForUserSettingsEventTest );				
+				ts.addTestSuite( ClearCurrentLookupUserScreenNameEventTest );
+				ts.addTestSuite( CreateUserSettingsDatabaseEventTest );
+				ts.addTestSuite( DatabaseCreatedEventTest );
+				ts.addTestSuite( EnableTransparencyEventTest );
+				ts.addTestSuite( ExitApplicationEventTest );
+				ts.addTestSuite( FailedLoginEventTest );
+				ts.addTestSuite( DirectMessagesEventTest );
+				ts.addTestSuite( FailedLoginEventTest );
+				ts.addTestSuite( FollowersEventTest );
+				ts.addTestSuite( FollowersRetrievedEventTest );
+				ts.addTestSuite( FriendsEventTest );
+				ts.addTestSuite( FriendsRetrievedEventTest );
+				ts.addTestSuite( FriendsTimelineEventTest );
+				ts.addTestSuite( InitializeAutoUpdateIntervalEventTest );
+				ts.addTestSuite( InitializeSystemTrayEventTest );
+				ts.addTestSuite( LocalSettingsPersistedEventTest );
+				ts.addTestSuite( PersistUserSettingsToLocalDatabaseEventTest );
+				ts.addTestSuite( PresentlyURLChangeEventTest );
+				ts.addTestSuite( PublicTimelineEventTest );
+				ts.addTestSuite( RefreshTimelineEventTest );
+				ts.addTestSuite( RepliesEventTest );
+				ts.addTestSuite( SendTextUpdateEventTest );
+				ts.addTestSuite( SetCurrentLookupUserScreenNameEventTest );
+				ts.addTestSuite( SetDirectMessagesNotificationsPrefEventTest );
+				ts.addTestSuite( SetMainStreamNotificationsPrefEventTest );
+				ts.addTestSuite( SetRememberLoginInfoPreferenceEventTest );
+				ts.addTestSuite( SetSelectedViewStateEventTest );
+				ts.addTestSuite( SetSystemTrayPreferenceEventTest );
+				ts.addTestSuite( ShowEventTest );
+				ts.addTestSuite( StatusAddedEventTest );
+				ts.addTestSuite( StatusesUpdatedEventTest );
+				ts.addTestSuite( TextUpdateSentEventTest );
+				ts.addTestSuite( UpdateAutoRefreshEventTest );
+				ts.addTestSuite( UpdateTransparencyEventTest );
+				ts.addTestSuite( UserLookupStatusesUpdatedEventTest );
+				ts.addTestSuite( UserRetrievedEventTest );
+				ts.addTestSuite( UserTimelineEventTest );
+				
+				// test commands
+				ts.addTestSuite( LoginCommandTest );
+				ts.addTestSuite( UpdateAutoRefreshCommandTest );
+				ts.addTestSuite( UpdateTransparencyCommandTest );
+				ts.addTestSuite( SetSystemTrayPreferenceCommandTest );
+				ts.addTestSuite( SetSelectedViewStateCommandTest );
+				ts.addTestSuite( SetRememberLoginInfoPreferenceCommandTest );
+				ts.addTestSuite( SetMainStreamNotificationsPrefCommandTest );
+				ts.addTestSuite( SetDirectMessagesNotificationsPrefCommandTest );
+				ts.addTestSuite( SetCurrentLookupUserScreenNameCommandTest );
+				ts.addTestSuite( PresentlyURLChangeCommandTest );
+				ts.addTestSuite( EnableTransparencyCommandTest );
+				ts.addTestSuite( ClearCurrentLookupUserScreenNameCommandTest );
+				
+				return ts;
+ 			}
+ 		]]>
+	</mx:Script>
+	
+	<!-- Creates an instance of the FlexUnit TestRunner to display test results/info. -->
+	<flexunit:TestRunnerBase id="testRunner" width="100%" height="100%" />
+	
+	<business:Services id="services" />
+	
+</mx:WindowedApplication>

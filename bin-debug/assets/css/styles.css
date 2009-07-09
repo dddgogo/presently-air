@@ -1,0 +1,208 @@
+/*
+ Copyright (c) 2009 Intridea. All Rights Reserved.
+ 
+ @project  Intridea: Present.ly AIR Client
+ @version  1.0.3
+ @author   Sean Moore (for Intridea)
+ 
+ @internal
+ */
+ 
+ 
+/**
+ *
+ * Embed Arial into the application for the primary font. Enables Fade effects
+ * to be applied to dynamic text fields such as Labels.
+ *
+ */
+@font-face {
+    src:url("../fonts/arial.ttf");
+    fontWeight: normal;
+    font-family: "Arial";
+}
+
+/**
+ *
+ * Also embed Arial bold. Used in conjunction with the 'normal' fontWeight.
+ *
+ */
+@font-face {
+    src:url("../fonts/arialbd.ttf");
+    fontWeight: bold;
+    font-family: "Arial";
+}
+
+/**
+ *
+ * Declares the background color for the application
+ *
+ */
+Application {
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+	theme-color: #9bf175;
+}
+
+Button {
+	font-family: Arial;	
+}
+
+Label {
+	font-family: Arial;
+}
+
+LinkButton {
+	font-family: Arial;
+}
+
+/**
+ *
+ */
+.titleBarBox {
+	padding-right: 8;
+	padding-bottom: 6;
+}
+
+/**
+ *
+ */
+.titleBarCloseWindowButton
+{
+	up-skin: Embed("../images/close-window.png");
+	down-skin: Embed("../images/close-window.png");
+	over-skin: Embed("../images/close-window-over.png");
+}
+.titleBarMinimizeWindowButton
+{
+	up-skin: Embed("../images/minimize-window.png");
+	down-skin: Embed("../images/minimize-window.png");
+	over-skin: Embed("../images/minimize-window-over.png");
+}
+
+/**
+ *
+ */
+.userAccount {
+	font-size: 10;
+ 	font-weight: bold;
+ 	color: #b2d56b;
+}
+
+/**
+ *
+ * Information used to style level 1 titles in the application views.
+ *
+ */ 
+.viewTitle {
+	font-size: 14;
+ 	font-weight: bold;
+ 	color: #c3f2cc;
+}
+
+/**
+ *
+ */ 
+.loginTitle {
+	font-size: 13;
+ 	color: #9abaa0;
+ 	padding-left: 17;
+ 	padding-top: 5;
+} 	
+
+/**
+ *
+ */
+.loginForm {
+	padding-top: 8;	
+}
+
+/**
+ *
+ */
+.loginBox {
+	background-color: #4c4c4c;
+	border-style: solid;
+	border-thickness: 0;
+	corner-radius: 5;
+}
+
+.loginFormTextInput {
+	background-color: #ffffff; /*4c4c4c*/
+	background-alpha: 0.1;
+	border-style: solid;
+	corner-radius: 5;
+	color: #deffe4;
+	drop-shadow-enabled: true;
+	drop-shadow-color: #343434;
+	shadow-direction: center;
+	shadow-distance: 1;
+	font-size: 12;
+}
+
+/**
+ *
+ */
+.loginFormLabel {
+	font-size: 12;
+	color: #a4c2ac;
+}
+
+/**
+ *
+ */
+.loginFormAccountLabel {
+	padding-left: 8;
+	color: #b0b0b0;
+}
+
+/**
+ *
+ */
+.registerLink {
+	/*
+	Setting the skin to mx.skins.ProgrammaticSkin resets the skin which 
+	removes the rollover color for the LinkButton.
+	*/
+	skin: ClassReference("mx.skins.ProgrammaticSkin");
+	color: #399552;
+	text-roll-over-color: #2bd75a;
+}
+
+/**
+ *
+ */
+.loginButton {
+	up-skin: Embed(source="../images/main-button-skin.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+	
+	down-skin: Embed(source="../images/main-button-skin.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+	
+	over-skin: Embed(source="../images/main-button-skin-over.png",
+						scaleGridLeft="4",
+						scaleGridTop="4",
+						scaleGridRight="78",
+						scaleGridBottom="27");
+	color: #9ebaa7;
+	font-size: 11;
+}
+
+/**
+ *
+ */
+.statusBar {
+	padding-right: 5;
+	padding-bottom: 5;
+}
+
+.statusText {
+	color: #839e88;	
+}

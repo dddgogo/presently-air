@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:view="com.intridea.presentlyAIRClient.view.*"
+	show="onShowUserLookupView();"
+	creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import com.intridea.presentlyAIRClient.events.SetCurrentLookupUserScreenNameEvent;
+			import com.intridea.presentlyAIRClient.model.domain.User;
+			import com.intridea.presentlyAIRClient.events.UserRetrievedEvent;
+			import com.intridea.presentlyAIRClient.events.ClearCurrentLookupUserScreenNameEvent;
+			import com.intridea.presentlyAIRClient.events.ShowEvent;
+			import mx.collections.ArrayCollection;
+			import com.intridea.presentlyAIRClient.events.UserLookupStatusesUpdatedEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.intridea.presentlyAIRClient.events.StatusesUpdatedEvent;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			import com.intridea.presentlyAIRClient.events.UserTimelineEvent;
+			
+			/**
+			 * 
+			 */
+			private static const dispatcher : CairngormEventDispatcher = CairngormEventDispatcher.getInstance();
+			
+			[Bindable]
+			/**
+			 * 
+			 */
+			private var statuses : ArrayCollection;
+			
+			[Bindable]
+			/**
+			 * 
+			 */			
+			private var lookupUser : User;
+			
+			/**
+			 * 
+			 */
+			private function init() : void
+			{
+				userLookUpTextInput.text = "";
+				dispatcher.addEventListener( UserLookupStatusesUpdatedEvent.EVENT, onUserLookupStatusesUpdated, false, 0, false );
+				dispatcher.addEventListener( UserRetrievedEvent.EVENT, onUserRetrievedForLookupView, false, 0, false );
+				
+				lookup();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onUserLookupStatusesUpdated( event : UserLookupStatusesUpdatedEvent ) : void
+			{
+				statuses = event.statuses;
+			}
+			
+			/**
+			 * 
+			 */
+			private function onUserRetrievedForLookupView( event : UserRetrievedEvent ) : void
+			{
+				lookupUser = event.user;
+			}
+			
+			/**
+			 * 
+			 */
+			private function onShowUserLookupView() : void
+			{
+				userLookUpTextInput.text = "";
+				userLookupStatusesTimelineTileList.dataProvider.removeAll();
+				userProfileRenderer.data = null;
+				lookup();
+			}
+			
+			/**
+			 * 
+			 */
+			public function lookup() : void
+			{
+				trace( ">>UserLookupView::lookup" );
+				
+				// NOTE: this hard reference should be cleaned up.
+				Application.application.mainView.disableActiveToolbarButton( Application.application.mainView.lookupButton );
+				
+				if ( ModelLocator.instance.currentLookupUserScreenName )
+				{
+					var showEvent : ShowEvent = new ShowEvent( ShowEvent.EVENT );
+					showEvent.screenName = ModelLocator.instance.currentLookupUserScreenName;
+					showEvent.dispatch();
+					
+					var userTimelineEvent : UserTimelineEvent = new UserTimelineEvent( UserTimelineEvent.EVENT );
+					userTimelineEvent.id = ModelLocator.instance.currentLookupUserScreenName;
+					userTimelineEvent.dispatch();
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function onLookupButtonClick() : void
+			{
+				new ClearCurrentLookupUserScreenNameEvent( ClearCurrentLookupUserScreenNameEvent.EVENT ).dispatch();
+				var setCurrentLookupUserEvent : SetCurrentLookupUserScreenNameEvent = new SetCurrentLookupUserScreenNameEvent( SetCurrentLookupUserScreenNameEvent.EVENT );
+				setCurrentLookupUserEvent.screenName = userLookUpTextInput.text; 
+				setCurrentLookupUserEvent.dispatch();
+				lookup();
+			}
+			
+		]]>
+	</mx:Script>
+	<view:UserProfileRenderer id="userProfileRenderer" data="{lookupUser}" />
+	<mx:TileList id="userLookupStatusesTimelineTileList" width="100%" height="100%"
+		dataProvider="{statuses}" 
+		columnCount="1"
+		itemRenderer="com.intridea.presentlyAIRClient.view.StatusesTimelineRenderer"
+		styleName="statusesTimelineTileList" />
+	<mx:HBox styleName="userLookupTextInputBox" >
+		<mx:TextInput id="userLookUpTextInput" styleName="userLookUpTextInput" />
+		<mx:Button click="onLookupButtonClick();" enabled="{userLookUpTextInput.text.length >= 1}" toolTip="Lookup" styleName="lookupButton" />
+	</mx:HBox>
+</mx:VBox>

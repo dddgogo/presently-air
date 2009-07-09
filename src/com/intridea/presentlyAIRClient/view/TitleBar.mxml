@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:paint="com.degrafa.paint.*"
+	xmlns:geometry="com.degrafa.geometry.*"
+	xmlns:degrafa="http://www.degrafa.com/2007"
+	styleName="titleBarBox"
+	>
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.events.ExitApplicationEvent;
+			import com.intridea.presentlyAIRClient.assets.AssetWarehouse;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			
+			/**
+			 * 
+			 */
+			private function exit() : void
+			{
+				new ExitApplicationEvent( ExitApplicationEvent.EVENT ).dispatch();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<!-- Begin background shape //-->
+	<degrafa:Surface>
+		<degrafa:fills>
+			<paint:LinearGradientFill id="titleBarBackgroundFill" angle="90">
+				<!-- Begin top color -->                    
+                <paint:GradientStop color="#3b3b3b"/>
+				<!-- /End top color -->                        
+				<!-- Begin bottom color -->
+				<paint:GradientStop color="#282828"/>
+				<!-- /End bottom color -->
+            </paint:LinearGradientFill>
+		</degrafa:fills>
+		<degrafa:GeometryGroup >
+			<geometry:RoundedRectangleComplex fill="{titleBarBackgroundFill}"
+				width="{this.width}" height="{this.height}"
+				topLeftRadius="10"
+            	topRightRadius="10"
+            	bottomLeftRadius="0"
+            	bottomRightRadius="0"/>
+		</degrafa:GeometryGroup> 
+	</degrafa:Surface>
+	<!-- /End background shape //-->
+	
+	<mx:VBox width="100%">
+		<mx:Spacer height="3"/>
+		<mx:HBox width="100%">
+			<mx:Image source="{AssetWarehouse.PRESENTLY_LOGO_IMAGE}"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button click="stage.nativeWindow.minimize();"
+				styleName="titleBarMinimizeWindowButton"/>		
+			<mx:Button click="exit();"
+				styleName="titleBarCloseWindowButton"/>
+		</mx:HBox>
+	</mx:VBox>
+		
+</mx:HBox>

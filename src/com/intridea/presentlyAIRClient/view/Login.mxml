@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009 Intridea. All Rights Reserved.
+ *
+ * @project  Intridea: Present.ly AIR Client
+ * @version  2.1.1
+ * @author   Sean Moore (for Intridea)
+ *
+ */
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	horizontalAlign="center"
+	creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.intridea.presentlyAIRClient.events.PresentlyURLChangeEvent;
+			import com.intridea.presentlyAIRClient.events.SetRememberLoginInfoPreferenceEvent;
+			import com.intridea.presentlyAIRClient.model.ModelLocator;
+			import flash.net.navigateToURL;
+			import com.intridea.presentlyAIRClient.context.ApplicationContext;
+			import com.intridea.presentlyAIRClient.assets.AssetWarehouse;
+			import com.intridea.presentlyAIRClient.events.FailedLoginEvent;
+			import com.intridea.presentlyAIRClient.events.AuthenticationEvent;
+			import com.intridea.presentlyAIRClient.events.SetSelectedViewStateEvent;
+			import com.intridea.presentlyAIRClient.utils.KeyboardUtils;
+			
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			
+			import mx.controls.Alert;
+			import mx.effects.easing.Quadratic;
+			import mx.events.EffectEvent;
+			
+			/**
+			 * 
+			 */
+			private static const dispatcher : CairngormEventDispatcher = CairngormEventDispatcher.getInstance();
+			
+			/**
+			 * 
+			 */
+			private function init() : void
+			{
+				dispatcher.addEventListener( AuthenticationEvent.SUCCESSFUL_LOGIN_EVENT, onSuccessfulLogin, false, 0, false );
+				dispatcher.addEventListener( AuthenticationEvent.SUCCESSFUL_LOGOUT_EVENT, onSuccessfulLogout, false, 0, false );				
+				dispatcher.addEventListener( FailedLoginEvent.EVENT, onFailedLogin, false, 0, false );
+				
+				addEventListener( KeyboardEvent.KEY_DOWN, onKeyDownForLogin, false, 0, false );
+				
+				loginTransition.play( [loginBox] );
+				username.setFocus();
+				enableLoginButton();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onFailedLogin( event : FailedLoginEvent ) : void
+			{
+				enableLoginButton();
+				trace( ">>Login::onFailedLogin" );
+				trace( "event.errorMessage: " + event.errorMessage );
+				Alert.show( "Invalid login credentials, please try again." , "Invalid login" );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onSuccessfulLogin( event : AuthenticationEvent ) : void
+			{				
+				loginHideTransition.addEventListener( EffectEvent.EFFECT_END, onHideTransitionEnd, false, 0, false );
+				
+				loginHideTransition.play( [loginBox] );
+				
+				removeEventListener( KeyboardEvent.KEY_DOWN, onKeyDownForLogin );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onSuccessfulLogout( event : AuthenticationEvent ) : void
+			{
+				dispatcher.removeEventListener( AuthenticationEvent.SUCCESSFUL_LOGOUT_EVENT, onSuccessfulLogout );
+				rememberMeCheckBox.selected = false;
+				init();	
+			}
+			
+			/**
+			 * 
+			 */
+			private function onHideTransitionEnd( event : EffectEvent ) : void
+			{
+				new SetSelectedViewStateEvent( ApplicationContext.STATUSES_TIMELINE_VIEW ).dispatch();	
+			}
+			
+			/**
+			 * 
+			 */
+			private function doLogin() : void
+			{
+				if ( username.text.length < 2 || username.text == "" )
+				{
+					Alert.show( "Please enter a valid username.", "Login Failed" );
+					username.setFocus();
+				}
+				else if ( account.text.length < 2 || account.text == ""  )
+				{
+					Alert.show( "Please enter a valid account.", "Login Failed" );
+					account.setFocus();
+				}
+				else if ( password.text == "" )
+				{
+					Alert.show( "Please enter a password.", "Login Failed" );
+					password.setFocus();
+				}
+				else
+				{
+					disableLoginButton();
+					var loginEvent : AuthenticationEvent = new AuthenticationEvent( AuthenticationEvent.LOGIN_EVENT );
+					loginEvent.username = username.text;
+					loginEvent.password = password.text;
+					loginEvent.account = account.text;
+					loginEvent.presentlyBaseURL = presentlyBaseURL.text;
+					loginEvent.dispatch();
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function onKeyDownForLogin( event : KeyboardEvent ) : void
+			{					
+	            if ( KeyboardUtils.isEnterEvent( event ) )
+				{
+					if ( username.text.length > 1 && password.text.length > 1 && account.text.length > 1 )
+					{
+						doLogin();	
+					}
+				}
+			}
+			
+			/**
+			 * 
+			 */
+			private function disableLoginButton() : void
+			{
+				loginButton.enabled = false;
+			}
+			
+			/**
+			 * 
+			 */
+			private function enableLoginButton() : void
+			{
+				loginButton.enabled = true;
+			}
+			
+			/**
+			 * 
+			 */
+			private function register() : void
+			{
+				navigateToURL( new URLRequest( ModelLocator.instance.REGISTER_URL) );
+			}
+			
+			/**
+			 * 
+			 */
+			private function setRememberLoginPreference( event : MouseEvent ) : void
+			{
+				var setRememberLoginInfoPreferenceEvent : SetRememberLoginInfoPreferenceEvent = new SetRememberLoginInfoPreferenceEvent( SetRememberLoginInfoPreferenceEvent.EVENT );
+				setRememberLoginInfoPreferenceEvent.rememberLoginInfo = event.currentTarget.selected;
+				setRememberLoginInfoPreferenceEvent.dispatch();
+			}
+			
+			/**
+			 * 
+			 */
+			private function onPresentlyURLChange( event : Event ) : void
+			{
+				var presentlyURLChangeEvent : PresentlyURLChangeEvent = new PresentlyURLChangeEvent( PresentlyURLChangeEvent.EVENT );
+				presentlyURLChangeEvent.url = event.currentTarget.text;
+				presentlyURLChangeEvent.dispatch();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<!-- Animates the login panel, initially brings it into view. //-->
+	<mx:Parallel id="loginTransition" duration="1400">
+		<mx:children>
+			<mx:Move yFrom="{this.height * -1}" yTo="35" easingFunction="Quadratic.easeOut"/>
+			<mx:Fade alphaFrom="0" alphaTo="1" easingFunction="Quadratic.easeOut"/>
+		</mx:children>
+	</mx:Parallel>
+	
+	<!-- Hide the login panel. //-->
+	<mx:Parallel id="loginHideTransition" duration="1100">
+		<mx:children>
+			<mx:Move yTo="{this.height * 2}" yFrom="35" easingFunction="Quadratic.easeIn"/>
+			<mx:Fade alphaFrom="1" alphaTo="0" easingFunction="Quadratic.easeOut"/>
+		</mx:children>
+	</mx:Parallel>
+	
+	<mx:DropShadowFilter id="dropShadow" 
+		alpha="0.15" 
+		blurX="12" blurY="12" 
+		distance="3" 
+		strength="1" 
+		angle="90"/>
+		
+	<!-- The login panel //-->
+	<mx:VBox id="loginBox" styleName="loginBox" filters="{[dropShadow]}">
+		<mx:HBox width="270" height="41" backgroundImage="{AssetWarehouse.LOGIN_HEADER_IMAGE}">
+			<mx:Label text="Login:" styleName="loginTitle"/>
+		</mx:HBox>
+		<mx:Form id="loginForm" styleName="loginForm">
+			<mx:FormItem label="Username:" labelStyleName="loginFormLabel">
+				<!-- Allow only Upper and lower case characters, numbers and -_. for the username //-->
+				<mx:TextInput id="username" text="{ModelLocator.instance.currentUser.screenName}" styleName="loginFormTextInput"
+					restrict="a-z A-Z 0-9 \- _." />
+			</mx:FormItem>
+			<mx:FormItem label="Password:" labelStyleName="loginFormLabel">
+				<mx:TextInput id="password" displayAsPassword="true" text="{ModelLocator.instance.currentUser.password}" styleName="loginFormTextInput"/>
+			</mx:FormItem>
+			<mx:FormItem label="Account:" labelStyleName="loginFormLabel">
+				<mx:TextInput id="account" text="{ModelLocator.instance.currentAccount}" styleName="loginFormTextInput" />
+			</mx:FormItem>
+			<mx:FormItem horizontalAlign="center">
+				<mx:TextInput id="presentlyBaseURL" text=".presentlyapp.com" change="onPresentlyURLChange(event);" styleName="loginFormTextInput"/>
+			</mx:FormItem>
+			<mx:FormItem horizontalAlign="center">
+				<mx:CheckBox id="rememberMeCheckBox" label="Remember me" 
+					click="setRememberLoginPreference(event);"
+					selected="{ModelLocator.instance.rememberLoginInfo}"
+					styleName="loginFormLabel" />
+			</mx:FormItem>
+		</mx:Form>
+		<mx:ControlBar width="100%">
+			<mx:LinkButton label="Need to register?" click="register();" styleName="registerLink"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button id="loginButton" label="Login »" styleName="mainButton" filters="{[dropShadow]}" click="doLogin();" />
+		</mx:ControlBar>
+	</mx:VBox>
+	<!-- /End the login panel //-->
+</mx:VBox>

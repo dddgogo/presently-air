@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="../../../../style.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../../../../print.css" type="text/css" media="print">
+<title>com.intridea.presentlyAIRClient.events Summary</title>
+</head>
+<body>
+<script type="text/javascript" language="javascript" src="../../../../asdoc.js"></script><script type="text/javascript" language="javascript" src="../../../../cookies.js"></script><script type="text/javascript" language="javascript">
+<!--
+				asdocTitle = 'com.intridea.presentlyAIRClient.events Package - API Documentation';
+				var baseRef = '../../../../';
+				window.onload = configPage;
+			--></script>
+<table style="display:none" id="titleTable" cellspacing="0" cellpadding="0" class="titleTable">
+<tr>
+<td align="left" class="titleTableTitle">API Documentation</td><td align="right" class="titleTableTopNav"><a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../package-summary.html">All&nbsp;Packages</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../class-summary.html">All&nbsp;Classes</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../index-list.html')" href="../../../../all-index-A.html">Index</a>&nbsp;|&nbsp;<a href="../../../../index.html?com/intridea/presentlyAIRClient/events/package-detail.html&amp;com/intridea/presentlyAIRClient/events/class-list.html" id="framesLink1">Frames</a><a onclick="parent.location=document.location" href="" style="display:none" id="noFramesLink1">No&nbsp;Frames</a></td><td rowspan="3" align="right" class="titleTableLogo"><img alt="Adobe Logo" title="Adobe Logo" class="logoImage" src="../../../../images/logo.jpg"></td>
+</tr>
+<tr class="titleTableRow2">
+<td align="left" id="subTitle" class="titleTableSubTitle">Package&nbsp;com.intridea.presentlyAIRClient.events</td><td align="right" id="subNav" class="titleTableSubNav"><a href="package-detail.html#classSummary">Classes</a></td>
+</tr>
+<tr class="titleTableRow3">
+<td colspan="2">&nbsp;</td>
+</tr>
+</table>
+<script type="text/javascript" language="javascript">
+<!--
+if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Package com.intridea.presentlyAIRClient.events"); titleBar_setSubNav(false,false,false,false,false,false,false,false,false,false,false,false,true,false);}
+--></script>
+<div class="MainContent">
+<br>
+<br>
+<hr>
+<a name="classSummary"></a>
+<div class="summaryTableTitle">Classes</div>
+<table class="summaryTable" cellspacing="0" cellpadding="3">
+<tr>
+<th>&nbsp;</th><th width="30%">Class</th><th width="70%">Description</th>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="AuthenticationEvent.html">AuthenticationEvent</a></td><td class="summaryTableLastCol">
+     
+     Authenticates users against the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="CheckDatabaseForUserSettingsEvent.html">CheckDatabaseForUserSettingsEvent</a></td><td class="summaryTableLastCol">
+          Opens the user settings SQLite database and checks for values to set on the data model
+     supplied by a user during previous interactions with the application.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ClearCurrentLookupUserScreenNameEvent.html">ClearCurrentLookupUserScreenNameEvent</a></td><td class="summaryTableLastCol">
+          Clears the last screen name set on the data model when the users performs lookup actions.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="CreateUserSettingsDatabaseEvent.html">CreateUserSettingsDatabaseEvent</a></td><td class="summaryTableLastCol">
+          Creates the user settings SQLite database used to persist application preferences set by the user
+     during interactions with the application.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="DatabaseCreatedEvent.html">DatabaseCreatedEvent</a></td><td class="summaryTableLastCol">
+          Generic event used to inform the application that the user settings SQLite database has
+     been successfully created.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="DirectMessagesEvent.html">DirectMessagesEvent</a></td><td class="summaryTableLastCol">
+          Used to request the direct messages data stream from the Present.ly server.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="EnableTransparencyEvent.html">EnableTransparencyEvent</a></td><td class="summaryTableLastCol">
+          Updates the data model to enable transparency for the overall application view.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ExitApplicationEvent.html">ExitApplicationEvent</a></td><td class="summaryTableLastCol">
+     
+     Handles user requests to close and exit the application.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FailedLoginEvent.html">FailedLoginEvent</a></td><td class="summaryTableLastCol">
+          Used to indicate the user's attempt to log in to the Present.ly server has failed.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FollowersEvent.html">FollowersEvent</a></td><td class="summaryTableLastCol">
+          Used to request the followers data stream from the Present.ly server for the current user.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FollowersRetrievedEvent.html">FollowersRetrievedEvent</a></td><td class="summaryTableLastCol">
+          Used to inform the view followers data has been returned by the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FriendsEvent.html">FriendsEvent</a></td><td class="summaryTableLastCol">
+     
+     Used to request the friends data stream from the Present.ly server for the current user.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FriendsRetrievedEvent.html">FriendsRetrievedEvent</a></td><td class="summaryTableLastCol">
+          Used to inform the view friends data has been returned by the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="FriendsTimelineEvent.html">FriendsTimelineEvent</a></td><td class="summaryTableLastCol">
+          Used to request the friends timeline data stream from the Present.ly server.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="InitializeAutoUpdateIntervalEvent.html">InitializeAutoUpdateIntervalEvent</a></td><td class="summaryTableLastCol">
+          Starts the auto interval requests to the Present.ly server to retrieve the data stream of 
+     the current service that's set on the data model.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="InitializeSystemTrayEvent.html">InitializeSystemTrayEvent</a></td><td class="summaryTableLastCol">
+          Sets up the system tray so the application icon will display and enables the user to minimize the application 
+     to the system tray.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="LocalSettingsPersistedEvent.html">LocalSettingsPersistedEvent</a></td><td class="summaryTableLastCol">
+          Used to send notifications that the user's preferences have been saved to the SQLite database.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="PersistUserSettingsToLocalDatabaseEvent.html">PersistUserSettingsToLocalDatabaseEvent</a></td><td class="summaryTableLastCol">
+          Persists the user's preferences to the local SQLite database.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="PresentlyURLChangeEvent.html">PresentlyURLChangeEvent</a></td><td class="summaryTableLastCol">
+          Updates the user's Present.ly URL on the data model.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="PublicTimelineEvent.html">PublicTimelineEvent</a></td><td class="summaryTableLastCol">
+          Used to request the public timeline data stream from the Present.ly server.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="RefreshTimelineEvent.html">RefreshTimelineEvent</a></td><td class="summaryTableLastCol">
+          Used to update the data on the timeline and in the view for the current service.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="RepliesEvent.html">RepliesEvent</a></td><td class="summaryTableLastCol">
+          Used to request the replies data stream from the Present.ly server.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SendTextUpdateEvent.html">SendTextUpdateEvent</a></td><td class="summaryTableLastCol">
+          Sends message text entered by user's to the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetCurrentLookupUserScreenNameEvent.html">SetCurrentLookupUserScreenNameEvent</a></td><td class="summaryTableLastCol">
+          Sets the screen name of the user being looked up that the current user has requested additional
+     information about.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetDirectMessagesNotificationsPrefEvent.html">SetDirectMessagesNotificationsPrefEvent</a></td><td class="summaryTableLastCol">
+          Updates the user's preference to enable and disable showing notifications for direct messages in the view.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetMainStreamNotificationsPrefEvent.html">SetMainStreamNotificationsPrefEvent</a></td><td class="summaryTableLastCol">
+          Updates the user's preference to enable and disable showing notifications for the main timeline 
+     stream in the view.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetRememberLoginInfoPreferenceEvent.html">SetRememberLoginInfoPreferenceEvent</a></td><td class="summaryTableLastCol">
+          Updates the user's preference to remember log in information in between interactions with the application.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetSelectedViewStateEvent.html">SetSelectedViewStateEvent</a></td><td class="summaryTableLastCol">
+          Used to change the applications view state.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="SetSystemTrayPreferenceEvent.html">SetSystemTrayPreferenceEvent</a></td><td class="summaryTableLastCol">
+     
+     Updates the user's preference to minimize the application to the system tray or the taskbar.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ShowEvent.html">ShowEvent</a></td><td class="summaryTableLastCol">
+          Used to request information about users being looked up by the current user.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="StatusAddedEvent.html">StatusAddedEvent</a></td><td class="summaryTableLastCol">
+          Notifies the view when a <code>Status</code> object has been returned from the 
+     Present.ly server and added to the <code>statuses</code> Array in the <code>StatusesManager</code> 
+     on the data model.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="StatusesUpdatedEvent.html">StatusesUpdatedEvent</a></td><td class="summaryTableLastCol">
+          Notifies the view when statuses have been returned from the Present.ly server.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="TextUpdateSentEvent.html">TextUpdateSentEvent</a></td><td class="summaryTableLastCol">
+          Notifies the view when a text message entered into the view by the user has been sent to the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="UpdateAutoRefreshEvent.html">UpdateAutoRefreshEvent</a></td><td class="summaryTableLastCol">
+          Updates the user's auto refresh increment setting on the data model.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="UpdateTransparencyEvent.html">UpdateTransparencyEvent</a></td><td class="summaryTableLastCol">
+          Updates the transparency of the overall application view.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="UserLookupStatusesUpdatedEvent.html">UserLookupStatusesUpdatedEvent</a></td><td class="summaryTableLastCol">
+          Retrives statuses for the current user being looked up.</td>
+</tr>
+<tr class="prow1">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="UserRetrievedEvent.html">UserRetrievedEvent</a></td><td class="summaryTableLastCol">
+          Notifies the <code>UserLookupView</code> that the requested user data has been returned by the Present.ly server.</td>
+</tr>
+<tr class="prow0">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="UserTimelineEvent.html">UserTimelineEvent</a></td><td class="summaryTableLastCol">
+          Used to request the statuses of users that are being looked up by the <code>UserLookupView</code>.</td>
+</tr>
+</table>
+<p></p>
+<div>
+<p></p>
+<center class="copyright">Copyright (c) 2009  www.intridea.com  All rights reserved.</center>
+</div>
+</div>
+</body>
+</html>
+<!--Copyright (c) 2009  www.intridea.com  All rights reserved.-->

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%"
+	verticalScrollPolicy="off"
+	clipContent="false">
+	
+	<mx:HBox width="100%" styleName="friendsFollowersRendererBox">
+		<mx:Image source="{data.profile.profileImageURL}" 
+			width="{ViewUtils.userProfileImageWidth}" height="{ViewUtils.userProfileImageHeight}" />
+		<mx:VBox width="100%">
+			<mx:Label text="{data.screenName}" styleName="username"/>
+			<mx:Label text="{data.name}" styleName="name"/>
+			<mx:Label text="{data.description}" includeInLayout="{data.description!=null}" styleName="description"/>
+			<mx:Label text="{data.location}" includeInLayout="{data.description!=null}" styleName="location"/>
+			<mx:HBox>
+				<mx:Label text="Friends:" styleName="friendsFollowersCountLabel" />
+				<mx:Label text="{data.friendsCount}, " styleName="friendsCount"/>
+				<mx:Label text="Followers:" styleName="friendsFollowersCountLabel" />
+				<mx:Label text="{data.followersCount}, " styleName="followersCount"/>
+				<mx:Label text="Updates:" styleName="friendsFollowersCountLabel" />
+				<mx:Label text="{data.statusesCount}" styleName="statusesCount"/>	
+			</mx:HBox>
+					
+		</mx:VBox>
+	</mx:HBox>
+	
+</mx:HBox>
